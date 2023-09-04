@@ -703,6 +703,8 @@ void ChildProcess() {
   CloseHandle(SymbolLookup::g_hParent);
   SymbolLookup::g_hParent = nullptr;
 
+  return;
+
   CrashDialog cd;
   cd.Run(IDD_DISASM_CRASH);
 }
