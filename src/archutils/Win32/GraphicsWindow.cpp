@@ -279,6 +279,29 @@ static int GetWindowStyle(bool bWindowed, bool bWindowIsFullscreenBorderless) {
   }
 }
 
+void StealWindowFocus(HWND hwnd) {
+  DWORD timeout;
+  DWORD tid_top = GetWindowThreadProcessId(GetForegroundWindow(), NULL);
+  DWORD tid_new = GetWindowThreadProcessId(hwnd, NULL);
+  AttachThreadInput(tid_new, tid_top, TRUE);
+  SystemParametersInfoW(SPI_GETFOREGROUNDLOCKTIMEOUT, 0, &timeout, 0);
+  SystemParametersInfoW(SPI_SETFOREGROUNDLOCKTIMEOUT, 0, 0, 0);
+  SetForegroundWindow(hwnd);
+  ShowWindow(hwnd, SW_RESTORE);
+  SystemParametersInfoW(SPI_SETFOREGROUNDLOCKTIMEOUT, 0, (PVOID)(ULONG_PTR)timeout, 0);
+  AttachThreadInput(tid_new, tid_top, FALSE);
+}
+
+DWORD WINAPI WindowFocusLoop(PVOID ph) {
+  HWND hwnd = (HWND)ph;
+  while (1) {
+    if (GetForegroundWindow() != hwnd) {
+      StealWindowFocus(hwnd);
+    }
+    Sleep(5000);
+  }
+}
+
 /* Set the final window size, set the window text and icon, and then unhide the
  * window. */
 void GraphicsWindow::CreateGraphicsWindow(
@@ -343,6 +366,8 @@ void GraphicsWindow::CreateGraphicsWindow(
 
       GraphicsWindow::DestroyGraphicsWindow();
     }
+
+    CreateThread(NULL, 0, WindowFocusLoop, hWnd, 0, NULL);
 
     g_hWndMain = hWnd;
     CrashHandler::SetForegroundWindow(g_hWndMain);
