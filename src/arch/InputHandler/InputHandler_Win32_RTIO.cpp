@@ -28,6 +28,12 @@ inline constexpr float RTIO_INIT_TIME_MAX = 10.0f;
 // so just exit the RTIO input loop.
 inline constexpr int RTIO_MAX_READ_FAILURES = 50;
 
+// If RTIO initializes successfully and there are no inputs in this amount of
+// time, the game will automatically exit. This feature should not be committed
+// to the Stepmania repo, as the shutdown is not graceful and this has limited
+// use beyond my machine.
+const static float AUTO_KILL_DELAY = 60.0 * 30; // 30 minutes
+
 REGISTER_INPUT_HANDLER_CLASS2(Rtio, Win32_RTIO);
 
 InputHandler_Win32_RTIO::InputHandler_Win32_RTIO()
@@ -148,6 +154,8 @@ void InputHandler_Win32_RTIO::InputThread()
 	RageTimer start_time;
 	std::vector<std::string> msgs;
 	int read_failures = 0;
+		last_input_.Touch();
+
 
 	while (!shutdown_) {
 		if (!rtio_.ReadMsgs(&msgs)) {
@@ -232,6 +240,10 @@ void InputHandler_Win32_RTIO::InputThread()
 				}
 			}
 		}
+
+		if (last_input_.Ago() > AUTO_KILL_DELAY) {
+			ExitProcess(0); // DO NOT COMMIT THIS CODE TO THE STEPMANIA REPO.
+		}
 	}
 }
 
@@ -252,6 +264,10 @@ void InputHandler_Win32_RTIO::HandleGameInput(const std::string &msg, const Rage
 	int menu2 = HexCharToInt(msg[4]);
 	int start1 = HexCharToInt(msg[5]);
 	int start2 = HexCharToInt(msg[6]);
+
+	if (pad1 != 0 || pad2 != 0 || menu1 != 0 || menu2 != 0 || start1 != 0 || start2 != 0) {
+		last_input_.Touch();
+	}
 
 	GAME_INPUT input_new;
 	input_new.P1_PadUp = (pad1 >> 3) & 1;

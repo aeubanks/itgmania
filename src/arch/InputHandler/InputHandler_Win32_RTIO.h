@@ -104,6 +104,7 @@ private:
 	COUNTER_STATE counter_state_ = COUNTER_STATE_SEND_1;
 	RageTimer last_counter_send_;
 	RageTimer last_counter_recv_;
+	RageTimer last_input_;
 };
 
 #endif
