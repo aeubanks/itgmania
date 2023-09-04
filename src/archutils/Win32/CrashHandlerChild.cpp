@@ -889,6 +889,8 @@ void ChildProcess()
 	CloseHandle( SymbolLookup::g_hParent );
 	SymbolLookup::g_hParent = nullptr;
 
+	return;
+
 	CrashDialog cd( sCrashReport, Data );
 #if defined(AUTOMATED_CRASH_REPORTS)
 	cd.Run( IDD_REPORT_CRASH );
