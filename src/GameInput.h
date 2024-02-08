@@ -76,7 +76,7 @@ GameButton StringToGameButton( const InputScheme* pInputs, const RString& s );
 #define DANCE_BUTTON_UPLEFT		GAME_BUTTON_CUSTOM_05
 /** @brief Set up the upright arrow for dance mode (solo). */
 #define DANCE_BUTTON_UPRIGHT	GAME_BUTTON_CUSTOM_06
-#define NUM_DANCE_BUTTONS		GAME_BUTTON_CUSTOM_07
+#define NUM_DANCE_BUTTONS		GAME_BUTTON_CUSTOM_13
 // pump
 /** @brief Set up the upleft arrow for pump mode. */
 #define PUMP_BUTTON_UPLEFT		GAME_BUTTON_CUSTOM_01

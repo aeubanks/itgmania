@@ -50,7 +50,7 @@ RString StepsTypeInfo::GetLocalizedString() const
 
 static const StepsTypeInfo g_StepsTypeInfos[] = {
 	// dance
-	{ "dance-single",	4,	true,	StepsTypeCategory_Single },
+	{ "dance-single",	12,	true,	StepsTypeCategory_Single },
 	{ "dance-double",	8,	true,	StepsTypeCategory_Double },
 	{ "dance-couple",	8,	true,	StepsTypeCategory_Couple },
 	{ "dance-solo",		6,	true,	StepsTypeCategory_Single },
@@ -151,27 +151,43 @@ static const Style g_Style_Dance_Single =
 	"single",			// m_szName
 	StepsType_dance_single,	// m_StepsType
 	StyleType_OnePlayerOneSide,		// m_StyleType
-	4,				// m_iColsPerPlayer
+	12,				// m_iColsPerPlayer
 	{	// m_ColumnInfo[NUM_PLAYERS][MAX_COLS_PER_PLAYER];
 		{	// PLAYER_1
-			{ TRACK_1,	-DANCE_COL_SPACING*1.5f, nullptr },
-			{ TRACK_2,	-DANCE_COL_SPACING*0.5f, nullptr },
-			{ TRACK_3,	+DANCE_COL_SPACING*0.5f, nullptr },
-			{ TRACK_4,	+DANCE_COL_SPACING*1.5f, nullptr },
+			{ TRACK_1,      -DANCE_COL_SPACING*5.5f, nullptr },
+			{ TRACK_2,      -DANCE_COL_SPACING*4.5f, nullptr },
+			{ TRACK_3,      -DANCE_COL_SPACING*3.5f, nullptr },
+			{ TRACK_4,      -DANCE_COL_SPACING*2.5f, nullptr },
+			{ TRACK_5,      -DANCE_COL_SPACING*1.5f, nullptr },
+			{ TRACK_6,      -DANCE_COL_SPACING*0.5f, nullptr },
+			{ TRACK_7,      +DANCE_COL_SPACING*0.5f, nullptr },
+			{ TRACK_8,      +DANCE_COL_SPACING*1.5f, nullptr },
+			{ TRACK_9,      +DANCE_COL_SPACING*2.5f, nullptr },
+			{ TRACK_10,     +DANCE_COL_SPACING*3.5f, nullptr },
+			{ TRACK_11,     +DANCE_COL_SPACING*4.5f, nullptr },
+			{ TRACK_12,     +DANCE_COL_SPACING*5.5f, nullptr },
 		},
 		{	// PLAYER_2
-			{ TRACK_1,	-DANCE_COL_SPACING*1.5f, nullptr },
-			{ TRACK_2,	-DANCE_COL_SPACING*0.5f, nullptr },
-			{ TRACK_3,	+DANCE_COL_SPACING*0.5f, nullptr },
-			{ TRACK_4,	+DANCE_COL_SPACING*1.5f, nullptr },
+			{ TRACK_1,      -DANCE_COL_SPACING*5.5f, nullptr },
+			{ TRACK_2,      -DANCE_COL_SPACING*4.5f, nullptr },
+			{ TRACK_3,      -DANCE_COL_SPACING*3.5f, nullptr },
+			{ TRACK_4,      -DANCE_COL_SPACING*2.5f, nullptr },
+			{ TRACK_5,      -DANCE_COL_SPACING*1.5f, nullptr },
+			{ TRACK_6,      -DANCE_COL_SPACING*0.5f, nullptr },
+			{ TRACK_7,      +DANCE_COL_SPACING*0.5f, nullptr },
+			{ TRACK_8,      +DANCE_COL_SPACING*1.5f, nullptr },
+			{ TRACK_9,      +DANCE_COL_SPACING*2.5f, nullptr },
+			{ TRACK_10,     +DANCE_COL_SPACING*3.5f, nullptr },
+			{ TRACK_11,     +DANCE_COL_SPACING*4.5f, nullptr },
+			{ TRACK_12,     +DANCE_COL_SPACING*5.5f, nullptr },
 		},
 	},
 	{	// m_iInputColumn[NUM_GameController][NUM_GameButton]
-		{ 0, 3, 2, 1, Style::END_MAPPING },
-		{ 0, 3, 2, 1, Style::END_MAPPING }
+		{ 0, 3, 2, 1, 4, 7, 6, 5, 8, 11, 10, 9, Style::END_MAPPING },
+		{ 0, 3, 2, 1, 4, 7, 6, 5, 8, 11, 10, 9, Style::END_MAPPING },
 	},
 	{	// m_iColumnDrawOrder[MAX_COLS_PER_PLAYER];
-		0, 1, 2, 3
+		0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
 	},
 	true, // m_bCanUseBeginnerHelper
 	false, // m_bLockDifficulties
@@ -514,12 +530,24 @@ static const Game g_Game_Dance =
 			{ "Right",		GAME_BUTTON_RIGHT },
 			{ "Up",			GAME_BUTTON_UP },
 			{ "Down",		GAME_BUTTON_DOWN },
-			{ "UpLeft",		GameButton_Invalid },
-			{ "UpRight",		GameButton_Invalid },
+			{ "Left",		GameButton_Invalid },
+			{ "Right",		GameButton_Invalid },
+			{ "Up",		GameButton_Invalid },
+			{ "Down",		GameButton_Invalid },
+			{ "Left",		GameButton_Invalid },
+			{ "Right",		GameButton_Invalid },
+			{ "Up",		GameButton_Invalid },
+			{ "Down",		GameButton_Invalid },
 		},
 		&g_AutoKeyMappings_Dance
 	},
 	{
+		{ GameButtonType_Step },
+		{ GameButtonType_Step },
+		{ GameButtonType_Step },
+		{ GameButtonType_Step },
+		{ GameButtonType_Step },
+		{ GameButtonType_Step },
 		{ GameButtonType_Step },
 		{ GameButtonType_Step },
 		{ GameButtonType_Step },

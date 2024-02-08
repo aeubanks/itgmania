@@ -10,7 +10,7 @@
 class InputHandler_Linux_Joystick: public InputHandler
 {
 public:
-	enum { NUM_JOYSTICKS = 4 };
+	enum { NUM_JOYSTICKS = 8 };
 	InputHandler_Linux_Joystick();
 	~InputHandler_Linux_Joystick();
 	bool TryDevice(RString dev);
