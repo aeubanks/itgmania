@@ -1,0 +1,244 @@
+Analyzing build trace from 'a'...
+**** Time summary:
+Compilation (1259 times):
+  Parsing (frontend):         1426.3 s
+  Codegen & opts (backend):    873.4 s
+
+**** Files that took longest to parse (compiler frontend):
+  8526 ms: /home/aeubanks/repos/itgmania/build-trace//src/CMakeFiles/ITGmania.dir/Steps.cpp.o
+  8099 ms: /home/aeubanks/repos/itgmania/build-trace//src/CMakeFiles/ITGmania.dir/ScreenEdit.cpp.o
+  7793 ms: /home/aeubanks/repos/itgmania/build-trace//src/CMakeFiles/ITGmania.dir/SongManager.cpp.o
+  7283 ms: /home/aeubanks/repos/itgmania/build-trace//src/CMakeFiles/ITGmania.dir/Profile.cpp.o
+  7021 ms: /home/aeubanks/repos/itgmania/build-trace//src/CMakeFiles/ITGmania.dir/GameState.cpp.o
+  6939 ms: /home/aeubanks/repos/itgmania/build-trace//src/CMakeFiles/ITGmania.dir/ScreenGameplay.cpp.o
+  6937 ms: /home/aeubanks/repos/itgmania/build-trace//src/CMakeFiles/ITGmania.dir/Song.cpp.o
+  6543 ms: /home/aeubanks/repos/itgmania/build-trace//src/CMakeFiles/ITGmania.dir/ScreenSelectMusic.cpp.o
+  6455 ms: /home/aeubanks/repos/itgmania/build-trace//src/CMakeFiles/ITGmania.dir/ScreenDebugOverlay.cpp.o
+  6423 ms: /home/aeubanks/repos/itgmania/build-trace//src/CMakeFiles/ITGmania.dir/MusicWheel.cpp.o
+
+**** Files that took longest to codegen (compiler backend):
+ 24978 ms: /home/aeubanks/repos/itgmania/build-trace//extern/CMakeFiles/glew.dir/glew/src/glew.c.o
+ 24008 ms: /home/aeubanks/repos/itgmania/build-trace//src/CMakeFiles/ITGmania.dir/PlayerOptions.cpp.o
+ 22916 ms: /home/aeubanks/repos/itgmania/build-trace//src/CMakeFiles/ITGmania.dir/ScreenEdit.cpp.o
+ 13887 ms: /home/aeubanks/repos/itgmania/build-trace//src/CMakeFiles/ITGmania.dir/Steps.cpp.o
+ 13157 ms: /home/aeubanks/repos/itgmania/build-trace//src/CMakeFiles/ITGmania.dir/SongManager.cpp.o
+ 12599 ms: /home/aeubanks/repos/itgmania/build-trace//src/CMakeFiles/ITGmania.dir/Profile.cpp.o
+ 12164 ms: /home/aeubanks/repos/itgmania/build-trace//src/CMakeFiles/ITGmania.dir/GameState.cpp.o
+ 11393 ms: /home/aeubanks/repos/itgmania/build-trace//src/CMakeFiles/ITGmania.dir/ScreenGameplay.cpp.o
+ 11054 ms: /home/aeubanks/repos/itgmania/build-trace//src/CMakeFiles/ITGmania.dir/Song.cpp.o
+  9947 ms: /home/aeubanks/repos/itgmania/build-trace//extern/CMakeFiles/jsoncpp.dir/jsoncpp/jsoncpp.cpp.o
+
+**** Templates that took longest to instantiate:
+  6169 ms: std::map<StepsType, StepParity::StageLayout>::map (116 times, avg 53 ms)
+  6085 ms: std::__detail::__hyperg<float> (403 times, avg 15 ms)
+  6018 ms: std::__detail::__hyperg<long double> (403 times, avg 14 ms)
+  5868 ms: std::_Rb_tree<StepsType, std::pair<const StepsType, StepParity::Stag... (116 times, avg 50 ms)
+  5538 ms: std::_Rb_tree<StepsType, std::pair<const StepsType, StepParity::Stag... (116 times, avg 47 ms)
+  4870 ms: std::vector<std::map<int, TapNote>>::operator= (113 times, avg 43 ms)
+  4563 ms: std::vector<Sprite::State>::operator= (151 times, avg 30 ms)
+  4541 ms: std::_Rb_tree<StdString::CStdStr<char>, std::pair<const StdString::C... (110 times, avg 41 ms)
+  4242 ms: std::_Rb_tree<StdString::CStdStr<char>, std::pair<const StdString::C... (55 times, avg 77 ms)
+  4130 ms: std::__detail::__hyperg_reflect<float> (403 times, avg 10 ms)
+  4072 ms: std::__detail::__hyperg_reflect<long double> (403 times, avg 10 ms)
+  4051 ms: std::_Rb_tree<StepsType, std::pair<const StepsType, StepParity::Stag... (116 times, avg 34 ms)
+  3699 ms: std::basic_string<char32_t> (424 times, avg 8 ms)
+  3526 ms: std::unique_ptr<std::array<std::basic_string<char>, 3>> (120 times, avg 29 ms)
+  3458 ms: std::vector<std::basic_string<wchar_t>>::operator= (84 times, avg 41 ms)
+  3430 ms: std::unordered_map<int, int> (126 times, avg 27 ms)
+  3313 ms: std::basic_string<char> (459 times, avg 7 ms)
+  3312 ms: std::basic_string<char16_t> (424 times, avg 7 ms)
+  3262 ms: std::basic_string<wchar_t> (459 times, avg 7 ms)
+  3196 ms: std::_Hashtable<int, std::pair<const int, std::vector<std::vector<St... (116 times, avg 27 ms)
+  3188 ms: std::basic_string<char16_t>::basic_string (424 times, avg 7 ms)
+  3164 ms: std::basic_string<char32_t>::basic_string (424 times, avg 7 ms)
+  3158 ms: std::__detail::__cyl_bessel_j<long double> (403 times, avg 7 ms)
+  3137 ms: std::__detail::__cyl_bessel_j<float> (403 times, avg 7 ms)
+  3023 ms: std::__uniq_ptr_data<std::array<std::basic_string<char>, 3>, std::de... (120 times, avg 25 ms)
+  2997 ms: std::__uniq_ptr_impl<std::array<std::basic_string<char>, 3>, std::de... (120 times, avg 24 ms)
+  2851 ms: std::_Rb_tree<int, std::pair<const int, std::vector<Song *>>, std::_... (110 times, avg 25 ms)
+  2819 ms: std::unordered_map<unsigned long, StepParity::State *> (116 times, avg 24 ms)
+  2798 ms: std::unordered_map<StepParity::StepParityNode *, float> (117 times, avg 23 ms)
+  2773 ms: std::_Hashtable<int, std::pair<const int, int>, std::allocator<std::... (126 times, avg 22 ms)
+
+**** Template sets that took longest to instantiate:
+ 52951 ms: std::vector<$> (10373 times, avg 5 ms)
+ 37933 ms: std::__or_<$> (38009 times, avg 0 ms)
+ 37457 ms: std::__and_<$> (24598 times, avg 1 ms)
+ 28544 ms: std::_Vector_base<$> (10251 times, avg 2 ms)
+ 24610 ms: std::allocator<$> (19624 times, avg 1 ms)
+ 22186 ms: std::_Destroy<$> (5130 times, avg 4 ms)
+ 21617 ms: std::vector<$>::~vector (4216 times, avg 5 ms)
+ 21153 ms: std::map<$> (2079 times, avg 10 ms)
+ 17859 ms: std::_Rb_tree<$>::_M_erase (1619 times, avg 11 ms)
+ 17105 ms: std::is_destructible<$> (4549 times, avg 3 ms)
+ 16638 ms: std::_Rb_tree<$>::~_Rb_tree (1390 times, avg 11 ms)
+ 15253 ms: std::_Hashtable<$> (940 times, avg 16 ms)
+ 14746 ms: std::_Rb_tree<$> (2843 times, avg 5 ms)
+ 14529 ms: std::__uninitialized_copy_a<$> (2422 times, avg 5 ms)
+ 14304 ms: std::__new_allocator<$> (16451 times, avg 0 ms)
+ 14139 ms: std::vector<$>::vector (1892 times, avg 7 ms)
+ 13757 ms: std::uninitialized_copy<$> (2421 times, avg 5 ms)
+ 13754 ms: std::basic_string<$> (1791 times, avg 7 ms)
+ 13317 ms: std::pair<$> (2339 times, avg 5 ms)
+ 12943 ms: __gnu_cxx::__alloc_traits<$> (17198 times, avg 0 ms)
+ 12650 ms: std::unordered_map<$> (535 times, avg 23 ms)
+ 12103 ms: std::__detail::__hyperg<$> (806 times, avg 15 ms)
+ 12098 ms: std::is_nothrow_default_constructible<$> (7405 times, avg 1 ms)
+ 11566 ms: std::copy<$> (2332 times, avg 4 ms)
+ 10583 ms: std::_Rb_tree<$>::_Rb_tree (476 times, avg 22 ms)
+ 10435 ms: std::__uninitialized_copy<$>::__uninit_copy<$> (2238 times, avg 4 ms)
+ 10245 ms: std::_Rb_tree_node<$> (1131 times, avg 9 ms)
+ 10170 ms: std::_Rb_tree<$>::_M_drop_node (1621 times, avg 6 ms)
+ 10136 ms: __gnu_cxx::__aligned_membuf<$> (1125 times, avg 9 ms)
+  9938 ms: std::__copy_move_a<$> (2384 times, avg 4 ms)
+
+**** Functions that took longest to compile:
+ 10438 ms: glewIsSupported (/home/aeubanks/repos/itgmania/extern/glew/src/glew.c)
+ 10080 ms: LunaPlayerOptions::LunaPlayerOptions() (/home/aeubanks/repos/itgmania/src/PlayerOptions.cpp)
+  2577 ms: _GLOBAL__sub_I_ScreenEdit.cpp (/home/aeubanks/repos/itgmania/src/ScreenEdit.cpp)
+  2564 ms: LunaActor::LunaActor() (/home/aeubanks/repos/itgmania/src/Actor.cpp)
+  2481 ms: glewContextInit (/home/aeubanks/repos/itgmania/extern/glew/src/glew.c)
+  1705 ms: PlayerOptions::GetMods(std::vector<StdString::CStdStr<char>, std::al... (/home/aeubanks/repos/itgmania/src/PlayerOptions.cpp)
+  1612 ms: LunaGameState::LunaGameState() (/home/aeubanks/repos/itgmania/src/GameState.cpp)
+  1519 ms: InitializeConfOptions() (/home/aeubanks/repos/itgmania/src/ScreenOptionsMasterPrefs.cpp)
+  1409 ms: glxewInit (/home/aeubanks/repos/itgmania/extern/glew/src/glew.c)
+  1409 ms: internal_dfa_exec (/home/aeubanks/repos/itgmania/extern/pcre/pcre_dfa_exec.c)
+  1307 ms: PrefsManager::PrefsManager() (/home/aeubanks/repos/itgmania/src/PrefsManager.cpp)
+  1261 ms: compile_branch (/home/aeubanks/repos/itgmania/extern/pcre/pcre_compile.c)
+  1151 ms: ScreenEvaluation::Init() (/home/aeubanks/repos/itgmania/src/ScreenEvaluation.cpp)
+  1125 ms: match (/home/aeubanks/repos/itgmania/extern/pcre/pcre_exec.c)
+  1102 ms: StatsManager::SavePadmissScore(StageStats const*, PlayerNumber) (/home/aeubanks/repos/itgmania/src/StatsManager.cpp)
+   859 ms: GetSSCNoteData(Song const&, Steps const&, bool) (/home/aeubanks/repos/itgmania/src/NotesWriterSSC.cpp)
+   815 ms: MusicWheel::BuildWheelItemDatas(std::vector<MusicWheelItemData*, std... (/home/aeubanks/repos/itgmania/src/MusicWheel.cpp)
+   813 ms: ScreenGameplay::Init() (/home/aeubanks/repos/itgmania/src/ScreenGameplay.cpp)
+   792 ms: Song::TidyUpData(bool, bool) (/home/aeubanks/repos/itgmania/src/Song.cpp)
+   751 ms: mad_layer_III (/home/aeubanks/repos/itgmania/extern/libmad/layer3.c)
+   741 ms: __cxx_global_var_init.6 (/home/aeubanks/repos/itgmania/src/InputMapper.cpp)
+   740 ms: ScreenUnlockStatus::Init() (/home/aeubanks/repos/itgmania/src/ScreenUnlockStatus.cpp)
+   714 ms: LuaHelpers::GetLuaInformation() (/home/aeubanks/repos/itgmania/src/LuaManager.cpp)
+   699 ms: ScreenSelectMaster::Init() (/home/aeubanks/repos/itgmania/src/ScreenSelectMaster.cpp)
+   658 ms: png_do_read_transformations (/home/aeubanks/repos/itgmania/extern/libpng/pngrtran.c)
+   646 ms: WriteGlobalTags(RageFile&, Song const&) (/home/aeubanks/repos/itgmania/src/NotesWriterSSC.cpp)
+   644 ms: glxewIsSupported (/home/aeubanks/repos/itgmania/extern/glew/src/glew.c)
+   623 ms: _GLOBAL__sub_I_ScreenDebugOverlay.cpp (/home/aeubanks/repos/itgmania/src/ScreenDebugOverlay.cpp)
+   596 ms: LunaSong::LunaSong() (/home/aeubanks/repos/itgmania/src/Song.cpp)
+   588 ms: ix::HttpClient::request(std::__cxx11::basic_string<char, std::char_t... (/home/aeubanks/repos/itgmania/extern/IXWebSocket/ixwebsocket/IXHttpClient.cpp)
+
+**** Function sets that took longest to compile / optimize:
+  6303 ms: ThemeMetric<$>::GetValue() const (228 times, avg 27 ms)
+  3310 ms: StepParity::StageLayout::StageLayout(StepsType, std::vector<$> const... (116 times, avg 28 ms)
+  2996 ms: StdString::CStdStr<char> StdString::operator+<char>(StdString::CStdS... (178 times, avg 16 ms)
+  2677 ms: ThemeMetric<$>::ThemeMetric(StdString::CStdStr<$> const&, StdString:... (198 times, avg 13 ms)
+  2262 ms: std::vector<$>::~vector() (422 times, avg 5 ms)
+  2219 ms: ThemeMetric<$>::~ThemeMetric() (254 times, avg 8 ms)
+  2152 ms: std::_Rb_tree<$>::_M_erase(std::_Rb_tree_node<$>*) (474 times, avg 4 ms)
+  1705 ms: PlayerOptions::GetMods(std::vector<$>&, bool) const (1 times, avg 1705 ms)
+  1602 ms: std::vector<$>::_M_default_append(unsigned long) (90 times, avg 17 ms)
+  1569 ms: MenuRowDef::MenuRowDef(int, StdString::CStdStr<$>, bool, EditMode, b... (5 times, avg 313 ms)
+  1374 ms: ThemeMetric<$>::Read() (254 times, avg 5 ms)
+  1354 ms: std::_Rb_tree_iterator<$> std::_Rb_tree<$>::_M_emplace_hint_unique<$... (135 times, avg 10 ms)
+  1338 ms: std::map<$>::map(std::initializer_list<$>, std::less<$> const&, std:... (116 times, avg 11 ms)
+  1124 ms: StdString::CStdStr<char> StdString::operator+<char>(StdString::CStdS... (118 times, avg 9 ms)
+  1014 ms: void std::vector<$>::_M_realloc_append<$>(StdString::CStdStr<$> cons... (62 times, avg 16 ms)
+  1008 ms: std::_Rb_tree<$>::_M_get_insert_hint_unique_pos(std::_Rb_tree_const_... (62 times, avg 16 ms)
+   877 ms: StdString::CStdStr<$>* std::__do_uninit_copy<$>(StdString::CStdStr<$... (87 times, avg 10 ms)
+   871 ms: Luna<$>::~Luna() (121 times, avg 7 ms)
+   856 ms: AutoMappings::AutoMappings(StdString::CStdStr<$>, StdString::CStdStr... (2 times, avg 428 ms)
+   832 ms: void std::vector<$>::_M_realloc_append<$>(StdString::CStdStr<$>&&) (50 times, avg 16 ms)
+   822 ms: std::_Rb_tree_node<$>* std::_Rb_tree<$>::_M_copy<$>(std::_Rb_tree_no... (88 times, avg 9 ms)
+   815 ms: MusicWheel::BuildWheelItemDatas(std::vector<$>&, SortOrder) (1 times, avg 815 ms)
+   779 ms: std::_Rb_tree<$>::_M_drop_node(std::_Rb_tree_node<$>*) (126 times, avg 6 ms)
+   743 ms: std::_Rb_tree<$>::_M_get_insert_unique_pos(StdString::CStdStr<$> con... (77 times, avg 9 ms)
+   718 ms: ThemeMetric<$>::ThemeMetric(ThemeMetric<$> const&) (52 times, avg 13 ms)
+   701 ms: std::pair<$>::~pair() (125 times, avg 5 ms)
+   658 ms: std::_Rb_tree_node<$>* std::_Rb_tree<$>::_M_create_node<$>(std::pair... (142 times, avg 4 ms)
+   647 ms: Luna<$>::Register(lua_State*, int, int) (121 times, avg 5 ms)
+   644 ms: std::map<$>::~map() (240 times, avg 2 ms)
+   601 ms: std::_Rb_tree_node<$>* std::_Rb_tree<$>::_M_copy<$>(std::_Rb_tree_no... (57 times, avg 10 ms)
+
+**** Expensive headers:
+357004 ms: /home/aeubanks/repos/itgmania/src/RageUtil.h (included 402 times, avg 888 ms), included via:
+  84x: <direct include>
+  5x: RageTextureManager.h RageTexture.h RageTypes.h EnumHelper.h 
+  4x: RageDisplay.h RageTypes.h EnumHelper.h 
+  4x: GameManager.h GameConstantsAndTypes.h EnumHelper.h 
+  4x: PrefsManager.h Preference.h EnumHelper.h 
+  4x: ActorUtil.h Actor.h PlayerNumber.h EnumHelper.h 
+  ...
+
+339121 ms: /home/aeubanks/repos/itgmania/src/EnumHelper.h (included 330 times, avg 1027 ms), included via:
+  11x: PrefsManager.h Preference.h 
+  5x: RageTextureManager.h RageTexture.h RageTypes.h 
+  5x: ActorUtil.h Actor.h PlayerNumber.h 
+  4x: RageDisplay.h RageTypes.h 
+  4x: GameManager.h GameConstantsAndTypes.h 
+  4x: NoteData.h NoteTypes.h GameConstantsAndTypes.h 
+  ...
+
+277104 ms: /home/aeubanks/repos/itgmania/src/global.h (included 424 times, avg 653 ms), included via:
+  422x: <direct include>
+  1x: PthreadHelpers.h 
+  1x: LinuxInputManager.h 
+
+192178 ms: /home/aeubanks/repos/itgmania/src/PlayerNumber.h (included 264 times, avg 727 ms), included via:
+  8x: GameState.h Attack.h 
+  7x: ActorUtil.h Actor.h 
+  5x: NoteData.h NoteTypes.h 
+  4x: NoteTypes.h 
+  4x: Song.h Attack.h 
+  4x: InputMapper.h 
+  ...
+
+167187 ms: /home/aeubanks/repos/itgmania/src/Actor.h (included 214 times, avg 781 ms), included via:
+  26x: Song.h Group.h ActorFrame.h 
+  8x: ProfileManager.h Profile.h Group.h ActorFrame.h 
+  8x: SongManager.h Song.h Group.h ActorFrame.h 
+  7x: ActorUtil.h 
+  5x: NoteSkinManager.h 
+  4x: <direct include>
+  ...
+
+132392 ms: /home/aeubanks/repos/itgmania/src/ActorFrame.h (included 186 times, avg 711 ms), included via:
+  31x: Song.h Group.h 
+  9x: SongManager.h Song.h Group.h 
+  8x: ProfileManager.h Profile.h Group.h 
+  4x: Profile.h Group.h 
+  2x: Screen.h 
+  2x: NoteDisplay.h 
+  ...
+
+125671 ms: /usr/include/c++/14.2.1/sstream (included 417 times, avg 301 ms), included via:
+  84x: RageUtil.h 
+  14x: <direct include>
+  5x: RageTextureManager.h RageTexture.h RageTypes.h EnumHelper.h RageUtil.h 
+  4x: RageDisplay.h RageTypes.h EnumHelper.h RageUtil.h 
+  4x: GameManager.h GameConstantsAndTypes.h EnumHelper.h RageUtil.h 
+  4x: PrefsManager.h Preference.h EnumHelper.h RageUtil.h 
+  ...
+
+110911 ms: /usr/include/c++/14.2.1/cmath (included 813 times, avg 136 ms), included via:
+  84x: RageUtil.h 
+  84x: RageUtil.h random 
+  5x: RageTextureManager.h RageTexture.h RageTypes.h EnumHelper.h RageUtil.h 
+  5x: <direct include>
+  5x: RageTextureManager.h RageTexture.h RageTypes.h EnumHelper.h RageUtil.h random 
+  4x: GameManager.h GameConstantsAndTypes.h EnumHelper.h RageUtil.h 
+  ...
+
+104694 ms: /usr/include/c++/14.2.1/algorithm (included 433 times, avg 241 ms), included via:
+  422x: global.h 
+  8x: <direct include>
+  1x: PthreadHelpers.h global.h 
+  1x: LinuxInputManager.h global.h 
+  1x: IXHttpClient.h 
+
+86972 ms: /home/aeubanks/repos/itgmania/src/Screen.h (included 74 times, avg 1175 ms), included via:
+  4x: <direct include>
+  2x: ScreenInstallOverlay.h 
+  2x: ScreenMiniMenu.h ScreenOptions.h ScreenWithMenuElements.h 
+  2x: ScreenPrompt.h ScreenWithMenuElements.h 
+  2x: ScreenSelectMusic.h ScreenWithMenuElements.h 
+  1x: ScreenPlayerOptions.h ScreenOptionsMaster.h ScreenOptions.h ScreenWithMenuElements.h 
+  ...
+
+  done in 0.4s.
