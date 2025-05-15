@@ -167,27 +167,27 @@ void PlayerOptions::Approach( const PlayerOptions& other, float fDeltaSeconds )
 	APPROACH( fSkew );
 	APPROACH( fPassmark );
 	APPROACH( fRandomSpeed );
-	for( int i=0; i<16; i++)
+	for( int i=0; i<18; i++)
 	    APPROACH( fMovesX[i] );
-	for( int i=0; i<16; i++)
+	for( int i=0; i<18; i++)
 	    APPROACH( fMovesY[i] );
-	for( int i=0; i<16; i++)
+	for( int i=0; i<18; i++)
 	    APPROACH( fMovesZ[i] );
-	for( int i=0; i<16; i++)
+	for( int i=0; i<18; i++)
 	    APPROACH( fConfusionX[i] );
-	for( int i=0; i<16; i++)
+	for( int i=0; i<18; i++)
 	    APPROACH( fConfusionY[i] );
-	for( int i=0; i<16; i++)
+	for( int i=0; i<18; i++)
 	    APPROACH( fConfusionZ[i] );
-	for( int i=0; i<16; i++)
+	for( int i=0; i<18; i++)
 	    APPROACH( fDarks[i] );
-	for( int i=0; i<16; i++)
+	for( int i=0; i<18; i++)
 	    APPROACH( fStealth[i] );
-	for( int i=0; i<16; i++)
+	for( int i=0; i<18; i++)
 	    APPROACH( fTiny[i] );
-	for( int i=0; i<16; i++)
+	for( int i=0; i<18; i++)
 	    APPROACH( fBumpy[i] );
-	for( int i=0; i<16; i++)
+	for( int i=0; i<18; i++)
 	    APPROACH( fReverse[i] );
 
 	DO_COPY( m_bSetScrollSpeed );
@@ -460,7 +460,7 @@ void PlayerOptions::GetMods( std::vector<RString> &AddTo, bool bForceNoteSkin ) 
 	AddPart( AddTo, m_bZBuffer,				"ZBuffer");
 	AddPart( AddTo, m_bCosecant,				"Cosecant");
 
-	for( int i=0; i<16; i++)
+	for( int i=0; i<18; i++)
 	{
 		RString s = ssprintf( "MoveX%d", i+1 );
 
@@ -843,7 +843,7 @@ bool PlayerOptions::FromOneModString( const RString &sOneMod, RString &sErrorOut
 		else if( sBit == "confusionxoffset" )		SET_FLOAT( fEffects[EFFECT_CONFUSION_X_OFFSET] )
 		else
 		{
-		    for (int i=0; i<16; i++)
+		    for (int i=0; i<18; i++)
 		    {
 			sMod = ssprintf( "confusionxoffset%d", i+1 );
 			if( sBit == sMod)
@@ -860,7 +860,7 @@ bool PlayerOptions::FromOneModString( const RString &sOneMod, RString &sErrorOut
 		else if( sBit == "confusionyoffset" )		SET_FLOAT( fEffects[EFFECT_CONFUSION_Y_OFFSET] )
 		else
 		{
-		    for (int i=0; i<16; i++)
+		    for (int i=0; i<18; i++)
 		    {
 			sMod = ssprintf( "confusionyoffset%d", i+1 );
 			if( sBit == sMod)
@@ -875,7 +875,7 @@ bool PlayerOptions::FromOneModString( const RString &sOneMod, RString &sErrorOut
 	    else if( sBit == "confusionoffset" )		SET_FLOAT( fEffects[EFFECT_CONFUSION_OFFSET] )
 	    else
 	    {
-		for (int i=0; i<16; i++)
+		for (int i=0; i<18; i++)
 		{
 		    sMod = ssprintf( "confusionoffset%d", i+1 );
 		    if( sBit == sMod)
@@ -901,7 +901,7 @@ bool PlayerOptions::FromOneModString( const RString &sOneMod, RString &sErrorOut
 	    if( sBit == "tiny" )				SET_FLOAT( fEffects[EFFECT_TINY] )
 	    else
 	    {
-		for (int i=0; i<16; i++)
+		for (int i=0; i<18; i++)
 		{
 		    sMod = ssprintf( "tiny%d", i+1 );
 		    if( sBit == sMod)
@@ -954,7 +954,7 @@ bool PlayerOptions::FromOneModString( const RString &sOneMod, RString &sErrorOut
 	    else if( sBit == "tanbumpyxperiod" )		SET_FLOAT( fEffects[EFFECT_TAN_BUMPY_X_PERIOD] )
 	    else
 	    {
-		for (int i=0; i<16; i++)
+		for (int i=0; i<18; i++)
 		{
 		    sMod = ssprintf( "bumpy%d", i+1 );
 		    if( sBit == sMod)
@@ -1050,7 +1050,7 @@ bool PlayerOptions::FromOneModString( const RString &sOneMod, RString &sErrorOut
 	    else if( sBit == "stealthpastreceptors" )		m_bStealthPastReceptors = on;
 	    else
 	    {
-		for (int i=0; i<16; i++)
+		for (int i=0; i<18; i++)
 		{
 		    sMod = ssprintf( "stealth%d", i+1 );
 		    if( sBit == sMod)
@@ -1096,7 +1096,7 @@ bool PlayerOptions::FromOneModString( const RString &sOneMod, RString &sErrorOut
 	    if( sBit == "reverse" )				SET_FLOAT( fScrolls[SCROLL_REVERSE] )
 	    else
 	    {
-		for (int i=0; i<16; i++)
+		for (int i=0; i<18; i++)
 		{
 		    sMod = ssprintf( "reverse%d", i+1 );
 		    if( sBit == sMod)
@@ -1122,7 +1122,7 @@ bool PlayerOptions::FromOneModString( const RString &sOneMod, RString &sErrorOut
 	    if( sBit == "dark" )				SET_FLOAT( fDark )
 	    else
 	    {
-		for (int i=0; i<16; i++)
+		for (int i=0; i<18; i++)
 		{
 		    sMod = ssprintf( "dark%d", i+1 );
 		    if( sBit == sMod)
@@ -1174,7 +1174,7 @@ bool PlayerOptions::FromOneModString( const RString &sOneMod, RString &sErrorOut
 	{
 	    if (sBit.find("x") != sBit.npos)
 	    {
-			for (int i=0; i<16; i++)
+			for (int i=0; i<18; i++)
 			{
 				sMod = ssprintf( "movex%d", i+1 );
 				if( sBit == sMod)
@@ -1186,7 +1186,7 @@ bool PlayerOptions::FromOneModString( const RString &sOneMod, RString &sErrorOut
 	    }
 	    else if (sBit.find("y") != sBit.npos)
 	    {
-			for (int i=0; i<16; i++)
+			for (int i=0; i<18; i++)
 			{
 				sMod = ssprintf( "movey%d", i+1 );
 				if( sBit == sMod)
@@ -1198,7 +1198,7 @@ bool PlayerOptions::FromOneModString( const RString &sOneMod, RString &sErrorOut
 	    }
 	    else if (sBit.find("z") != sBit.npos)
 	    {
-			for (int i=0; i<16; i++)
+			for (int i=0; i<18; i++)
 			{
 				sMod = ssprintf( "movez%d", i+1 );
 				if( sBit == sMod)
@@ -1499,27 +1499,27 @@ bool PlayerOptions::operator==( const PlayerOptions &other ) const
 		COMPARE(m_bTurns[i]);
 	for( int i = 0; i < PlayerOptions::NUM_TRANSFORMS; ++i )
 		COMPARE(m_bTransforms[i]);
-	for( int i = 0; i < 16; ++i )
+	for( int i = 0; i < 18; ++i )
 		COMPARE(m_fMovesX[i]);
-	for( int i = 0; i < 16; ++i )
+	for( int i = 0; i < 18; ++i )
 		COMPARE(m_fMovesY[i]);
-	for( int i = 0; i < 16; ++i )
+	for( int i = 0; i < 18; ++i )
 		COMPARE(m_fMovesZ[i]);
-	for( int i = 0; i < 16; ++i )
+	for( int i = 0; i < 18; ++i )
 		COMPARE(m_fConfusionX[i]);
-	for( int i = 0; i < 16; ++i )
+	for( int i = 0; i < 18; ++i )
 		COMPARE(m_fConfusionY[i]);
-	for( int i = 0; i < 16; ++i )
+	for( int i = 0; i < 18; ++i )
 		COMPARE(m_fConfusionZ[i]);
-	for( int i = 0; i < 16; ++i )
+	for( int i = 0; i < 18; ++i )
 		COMPARE(m_fDarks[i]);
-	for( int i = 0; i < 16; ++i )
+	for( int i = 0; i < 18; ++i )
 		COMPARE(m_fStealth[i]);
-	for( int i = 0; i < 16; ++i )
+	for( int i = 0; i < 18; ++i )
 		COMPARE(m_fTiny[i]);
-	for( int i = 0; i < 16; ++i )
+	for( int i = 0; i < 18; ++i )
 		COMPARE(m_fBumpy[i]);
-	for( int i = 0; i < 16; ++i )
+	for( int i = 0; i < 18; ++i )
 		COMPARE(m_fReverse[i]);
 #undef COMPARE
 	return true;
@@ -1592,47 +1592,47 @@ PlayerOptions& PlayerOptions::operator=(PlayerOptions const& other)
 	{
 		CPY(m_bTransforms[i]);
 	}
-	for( int i = 0; i < 16; ++i )
+	for( int i = 0; i < 18; ++i )
 	{
 		CPY_SPEED(fMovesX[i]);
 	}
-	for( int i = 0; i < 16; ++i )
+	for( int i = 0; i < 18; ++i )
 	{
 		CPY_SPEED(fMovesY[i]);
 	}
-	for( int i = 0; i < 16; ++i )
+	for( int i = 0; i < 18; ++i )
 	{
 		CPY_SPEED(fMovesZ[i]);
 	}
-	for( int i = 0; i < 16; ++i )
+	for( int i = 0; i < 18; ++i )
 	{
 		CPY_SPEED(fConfusionX[i]);
 	}
-	for( int i = 0; i < 16; ++i )
+	for( int i = 0; i < 18; ++i )
 	{
 		CPY_SPEED(fConfusionY[i]);
 	}
-	for( int i = 0; i < 16; ++i )
+	for( int i = 0; i < 18; ++i )
 	{
 		CPY_SPEED(fConfusionZ[i]);
 	}
-	for( int i = 0; i < 16; ++i )
+	for( int i = 0; i < 18; ++i )
 	{
 		CPY_SPEED(fDarks[i]);
 	}
-	for( int i = 0; i < 16; ++i )
+	for( int i = 0; i < 18; ++i )
 	{
 		CPY_SPEED(fStealth[i]);
 	}
-	for( int i = 0; i < 16; ++i )
+	for( int i = 0; i < 18; ++i )
 	{
 		CPY_SPEED(fTiny[i]);
 	}
-	for( int i = 0; i < 16; ++i )
+	for( int i = 0; i < 18; ++i )
 	{
 		CPY_SPEED(fBumpy[i]);
 	}
-	for( int i = 0; i < 16; ++i )
+	for( int i = 0; i < 18; ++i )
 	{
 		CPY_SPEED(fReverse[i]);
 	}

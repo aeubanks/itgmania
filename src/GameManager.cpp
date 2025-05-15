@@ -38,7 +38,8 @@ enum
 	TRACK_14,
 	TRACK_15,
 	TRACK_16,
-	// 16 tracks needed for beat-double7 and techno-double8
+	TRACK_17,
+	TRACK_18,
 };
 
 RString StepsTypeInfo::GetLocalizedString() const
@@ -57,7 +58,7 @@ static const StepsTypeInfo g_StepsTypeInfos[] = {
 	{ "dance-threepanel",	3,	true,	StepsTypeCategory_Single }, // thanks to kurisu
 	{ "dance-routine",	8,	false,	StepsTypeCategory_Routine },
 	// pump
-	{ "pump-single",	5,	true,	StepsTypeCategory_Single },
+	{ "pump-single",	18,	true,	StepsTypeCategory_Single },
 	{ "pump-halfdouble",	6,	true,	StepsTypeCategory_Double },
 	{ "pump-double",	10,	true,	StepsTypeCategory_Double },
 	{ "pump-couple",	10,	true,	StepsTypeCategory_Couple },
@@ -559,7 +560,7 @@ static const AutoMappings g_AutoKeyMappings_Pump = AutoMappings (
 // PIU Defaults: RowSpacing = 60; ColSpacing = 52; ArrowSize = 54;
 // apparently column spacing is 48px
 //static ThemeMetric<int>	PUMP_COL_SPACING	("ColumnSpacing","Pump");
-static const int PUMP_COL_SPACING = 48;
+static const int PUMP_COL_SPACING = 56;
 
 static const Style g_Style_Pump_Single =
 {	// STYLE_PUMP_SINGLE
@@ -570,29 +571,57 @@ static const Style g_Style_Pump_Single =
 	"single",			// m_szName
 	StepsType_pump_single,		// m_StepsType
 	StyleType_OnePlayerOneSide,		// m_StyleType
-	5,				// m_iColsPerPlayer
+	18,				// m_iColsPerPlayer
 	{	// m_ColumnInfo[NUM_PLAYERS][MAX_COLS_PER_PLAYER];
 		{	// PLAYER_1
-			{ TRACK_1,	-PUMP_COL_SPACING*2.0f, nullptr },
-			{ TRACK_2,	-PUMP_COL_SPACING*1.0f, nullptr },
-			{ TRACK_3,	+PUMP_COL_SPACING*0.0f, nullptr },
-			{ TRACK_4,	+PUMP_COL_SPACING*1.0f, nullptr },
-			{ TRACK_5,	+PUMP_COL_SPACING*2.0f, nullptr },
+			{ TRACK_1,	-DANCE_COL_SPACING*8.5f, nullptr },
+			{ TRACK_2,	-DANCE_COL_SPACING*6.5f, nullptr },
+			{ TRACK_3,	-DANCE_COL_SPACING*4.5f, nullptr },
+			{ TRACK_4,	-DANCE_COL_SPACING*2.5f, nullptr },
+			{ TRACK_5,	-DANCE_COL_SPACING*0.5f, nullptr },
+			{ TRACK_6,	+DANCE_COL_SPACING*0.5f, nullptr },
+			{ TRACK_7,	+DANCE_COL_SPACING*2.5f, nullptr },
+			{ TRACK_8,	+DANCE_COL_SPACING*4.5f, nullptr },
+			{ TRACK_9,	+DANCE_COL_SPACING*6.5f, nullptr },
+			{ TRACK_10,+DANCE_COL_SPACING*8.5f, nullptr },
+
+			{ TRACK_11,	-DANCE_COL_SPACING*7.5f, nullptr },
+			{ TRACK_12,	-DANCE_COL_SPACING*5.5f, nullptr },
+			{ TRACK_13,	-DANCE_COL_SPACING*3.5f, nullptr },
+			{ TRACK_14,	-DANCE_COL_SPACING*1.5f, nullptr },
+			{ TRACK_15,	+DANCE_COL_SPACING*1.5f, nullptr },
+			{ TRACK_16,	+DANCE_COL_SPACING*3.5f, nullptr },
+			{ TRACK_17,	+DANCE_COL_SPACING*5.5f, nullptr },
+			{ TRACK_18,	+DANCE_COL_SPACING*7.5f, nullptr },
 		},
 		{	// PLAYER_2
-			{ TRACK_1,	-PUMP_COL_SPACING*2.0f, nullptr },
-			{ TRACK_2,	-PUMP_COL_SPACING*1.0f, nullptr },
-			{ TRACK_3,	+PUMP_COL_SPACING*0.0f, nullptr },
-			{ TRACK_4,	+PUMP_COL_SPACING*1.0f, nullptr },
-			{ TRACK_5,	+PUMP_COL_SPACING*2.0f, nullptr },
+			{ TRACK_1,	-DANCE_COL_SPACING*8.5f, nullptr },
+			{ TRACK_2,	-DANCE_COL_SPACING*6.5f, nullptr },
+			{ TRACK_3,	-DANCE_COL_SPACING*4.5f, nullptr },
+			{ TRACK_4,	-DANCE_COL_SPACING*2.5f, nullptr },
+			{ TRACK_5,	-DANCE_COL_SPACING*0.5f, nullptr },
+			{ TRACK_6,	+DANCE_COL_SPACING*0.5f, nullptr },
+			{ TRACK_7,	+DANCE_COL_SPACING*2.5f, nullptr },
+			{ TRACK_8,	+DANCE_COL_SPACING*4.5f, nullptr },
+			{ TRACK_9,	+DANCE_COL_SPACING*6.5f, nullptr },
+			{ TRACK_10,+DANCE_COL_SPACING*8.5f, nullptr },
+
+			{ TRACK_11,	-DANCE_COL_SPACING*7.5f, nullptr },
+			{ TRACK_12,	-DANCE_COL_SPACING*5.5f, nullptr },
+			{ TRACK_13,	-DANCE_COL_SPACING*3.5f, nullptr },
+			{ TRACK_14,	-DANCE_COL_SPACING*1.5f, nullptr },
+			{ TRACK_15,	+DANCE_COL_SPACING*1.5f, nullptr },
+			{ TRACK_16,	+DANCE_COL_SPACING*3.5f, nullptr },
+			{ TRACK_17,	+DANCE_COL_SPACING*5.5f, nullptr },
+			{ TRACK_18,	+DANCE_COL_SPACING*7.5f, nullptr },
 		},
 	},
 	{	// m_iInputColumn[NUM_GameController][NUM_GameButton]
-		{ 1, 3, 2, 0, 4, Style::END_MAPPING },
-		{ 1, 3, 2, 0, 4, Style::END_MAPPING },
+		{ 1, 3, 2, 0, 4, 6, 8, 7, 5, 9, 10, 11, 12, 13, 14, 15, 16, 17, Style::END_MAPPING },
+		{ 1, 3, 2, 0, 4, 6, 8, 7, 5, 9, 10, 11, 12, 13, 14, 15, 16, 17, Style::END_MAPPING },
 	},
 	{	// m_iColumnDrawOrder[MAX_COLS_PER_PLAYER];
-		2,1,3,0,4
+		2,1,3,0,4, 7, 6, 8, 5, 9, 10, 11, 12, 13, 14, 15, 16, 17
 	},
 	false, // m_bCanUseBeginnerHelper
 	false, // m_bLockDifficulties
@@ -880,10 +909,36 @@ static const Game g_Game_Pump =
 			{ "Center",		GAME_BUTTON_START },
 			{ "DownLeft",		GAME_BUTTON_LEFT },
 			{ "DownRight",		GAME_BUTTON_RIGHT },
+			{ "UpLeft",		GameButton_Invalid },
+			{ "UpRight",	GameButton_Invalid },
+			{ "Center",		GameButton_Invalid },
+			{ "DownLeft",		GameButton_Invalid },
+			{ "DownRight",		GameButton_Invalid },
+			{ "Left",		GameButton_Invalid },
+			{ "Down",		GameButton_Invalid },
+			{ "Up",		GameButton_Invalid },
+			{ "Right",		GameButton_Invalid },
+			{ "Left",		GameButton_Invalid },
+			{ "Down",		GameButton_Invalid },
+			{ "Up",		GameButton_Invalid },
+			{ "Right",		GameButton_Invalid },
 		},
 		&g_AutoKeyMappings_Pump
 	},
 	{
+		{ GameButtonType_Step },
+		{ GameButtonType_Step },
+		{ GameButtonType_Step },
+		{ GameButtonType_Step },
+		{ GameButtonType_Step },
+		{ GameButtonType_Step },
+		{ GameButtonType_Step },
+		{ GameButtonType_Step },
+		{ GameButtonType_Step },
+		{ GameButtonType_Step },
+		{ GameButtonType_Step },
+		{ GameButtonType_Step },
+		{ GameButtonType_Step },
 		{ GameButtonType_Step },
 		{ GameButtonType_Step },
 		{ GameButtonType_Step },
