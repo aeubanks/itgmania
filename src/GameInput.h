@@ -89,7 +89,7 @@ GameButton StringToGameButton( const InputScheme* pInputs, const RString& s );
 #define PUMP_BUTTON_DOWNLEFT	GAME_BUTTON_CUSTOM_04
 /** @brief Set up the downright arrow for pump mode. */
 #define PUMP_BUTTON_DOWNRIGHT	GAME_BUTTON_CUSTOM_05
-#define NUM_PUMP_BUTTONS		GAME_BUTTON_CUSTOM_06
+#define NUM_PUMP_BUTTONS		GAME_BUTTON_CUSTOM_19
 // kb7
 #define KB7_BUTTON_KEY1			GAME_BUTTON_CUSTOM_01
 #define KB7_BUTTON_KEY2			GAME_BUTTON_CUSTOM_02

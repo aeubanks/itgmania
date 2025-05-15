@@ -2121,6 +2121,7 @@ static void ShiftToRightSide( int &iCol, int iNumTracks )
 	{
 	DEFAULT_FAIL( GAMESTATE->GetCurrentStyle(GAMESTATE->GetMasterPlayerNumber())->m_StyleType );
 	case StyleType_OnePlayerOneSide:
+		iCol += 10;
 		break;
 	case StyleType_TwoPlayersTwoSides:
 	case StyleType_OnePlayerTwoSides:
