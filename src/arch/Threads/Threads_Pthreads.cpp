@@ -160,6 +160,16 @@ static bool UseTimedlock() {
 bool MutexImpl_Pthreads::Lock() {
 #if defined(HAVE_PTHREAD_MUTEX_TIMEDLOCK)
   if (UseTimedlock()) {
+    /* Fast path: an uncontended lock doesn't need a deadline at all, so try
+     * once without the gettimeofday() the timed path requires. This mutex is
+     * locked many times per frame (e.g. input polling), almost always
+     * uncontended, so skipping that clock read is a measurable win. Only when
+     * the mutex is actually held do we fall back to the timed, deadlock-
+     * detecting wait below. */
+    if (pthread_mutex_trylock(&mutex) == 0) {
+      return true;
+    }
+
     int len = 10;  // seconds
     int tries = 2;
 
