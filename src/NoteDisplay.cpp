@@ -254,50 +254,54 @@ static void DeleteNoteResource(NoteResource* pRes) {
 
 /* NoteColorActor */
 
-NoteColorActor::NoteColorActor() { m_p.clear(); }
+NoteColorActor::NoteColorActor() {
+  for (NoteResource*& p : m_p) {
+    p = nullptr;
+  }
+}
 
 NoteColorActor::~NoteColorActor() {
-  for (auto& it : m_p) {
-    if (it.second) {
-      DeleteNoteResource(it.second);
+  for (NoteResource* p : m_p) {
+    if (p) {
+      DeleteNoteResource(p);
     }
   }
-  m_p.clear();
 }
 
 void NoteColorActor::Load(
     const std::string& sButton, const std::string& sElement, PlayerNumber pn,
-    GameController gc, const std::string& sColor) {
-  m_p[sColor] = MakeNoteResource(sButton, sElement, pn, gc, false, sColor);
+    GameController gc, NoteType nt) {
+  m_p[nt] = MakeNoteResource(
+      sButton, sElement, pn, gc, false, NoteTypeToString(nt));
 }
 
-Actor* NoteColorActor::Get(const std::string& sColor) {
-  return m_p[sColor]->m_pActor;
-}
+Actor* NoteColorActor::Get(NoteType nt) { return m_p[nt]->m_pActor; }
 
 /* NoteColorSprite */
 
-NoteColorSprite::NoteColorSprite() { m_p.clear(); }
+NoteColorSprite::NoteColorSprite() {
+  for (NoteResource*& p : m_p) {
+    p = nullptr;
+  }
+}
 
 NoteColorSprite::~NoteColorSprite() {
-  if (!m_p.empty()) {
-    for (auto& it : m_p) {
-      if (it.second) {
-        DeleteNoteResource(it.second);
-      }
+  for (NoteResource* p : m_p) {
+    if (p) {
+      DeleteNoteResource(p);
     }
-    m_p.clear();
   }
 }
 
 void NoteColorSprite::Load(
     const std::string& sButton, const std::string& sElement, PlayerNumber pn,
-    GameController gc, const std::string& sColor) {
-  m_p[sColor] = MakeNoteResource(sButton, sElement, pn, gc, true, sColor);
+    GameController gc, NoteType nt) {
+  m_p[nt] =
+      MakeNoteResource(sButton, sElement, pn, gc, true, NoteTypeToString(nt));
 }
 
-Sprite* NoteColorSprite::Get(const std::string& sColor) {
-  return dynamic_cast<Sprite*>(m_p[sColor]->m_pActor);
+Sprite* NoteColorSprite::Get(NoteType nt) {
+  return dynamic_cast<Sprite*>(m_p[nt]->m_pActor);
 }
 
 static const char* HoldTypeNames[] = {
@@ -435,35 +439,33 @@ void NoteDisplay::Load(
           ->ColToButtonName(iColNum);
 
   cache->Load(sButton);
-  std::vector<std::string> Colors = {"4th",  "8th",  "12th", "16th", "24th",
-                                     "32nd", "48th", "64th", "192nd"};
-  for (const std::string& color : Colors) {
+  FOREACH_ENUM(NoteType, nt) {
     // "normal" note types
-    m_TapNote.Load(sButton, "Tap Note", pn, GameI[0].controller, color);
+    m_TapNote.Load(sButton, "Tap Note", pn, GameI[0].controller, nt);
     // m_TapAdd.Load(		sButton, "Tap Addition", pn, GameI.controller );
-    m_TapMine.Load(sButton, "Tap Mine", pn, GameI[0].controller, color);
-    m_TapLift.Load(sButton, "Tap Lift", pn, GameI[0].controller, color);
-    m_TapFake.Load(sButton, "Tap Fake", pn, GameI[0].controller, color);
+    m_TapMine.Load(sButton, "Tap Mine", pn, GameI[0].controller, nt);
+    m_TapLift.Load(sButton, "Tap Lift", pn, GameI[0].controller, nt);
+    m_TapFake.Load(sButton, "Tap Fake", pn, GameI[0].controller, nt);
 
     // hold types
     FOREACH_HoldType(ht) {
       FOREACH_ActiveType(at) {
         m_HoldHead[ht][at].Load(
             sButton, HoldTypeToString(ht) + " Head " + ActiveTypeToString(at),
-            pn, GameI[0].controller, color);
+            pn, GameI[0].controller, nt);
         m_HoldTopCap[ht][at].Load(
             sButton, HoldTypeToString(ht) + " Topcap " + ActiveTypeToString(at),
-            pn, GameI[0].controller, color);
+            pn, GameI[0].controller, nt);
         m_HoldBody[ht][at].Load(
             sButton, HoldTypeToString(ht) + " Body " + ActiveTypeToString(at),
-            pn, GameI[0].controller, color);
+            pn, GameI[0].controller, nt);
         m_HoldBottomCap[ht][at].Load(
             sButton,
             HoldTypeToString(ht) + " Bottomcap " + ActiveTypeToString(at), pn,
-            GameI[0].controller, color);
+            GameI[0].controller, nt);
         m_HoldTail[ht][at].Load(
             sButton, HoldTypeToString(ht) + " Tail " + ActiveTypeToString(at),
-            pn, GameI[0].controller, color);
+            pn, GameI[0].controller, nt);
       }
     }
   }
@@ -713,8 +715,7 @@ void NoteDisplay::SetActiveFrame(
 
 Actor* NoteDisplay::GetTapActor(
     NoteColorActor& nca, NotePart part, float fNoteBeat) {
-  const std::string& sColor = NoteTypeToString(BeatToNoteType(fNoteBeat));
-  Actor* pActorOut = nca.Get(sColor);
+  Actor* pActorOut = nca.Get(BeatToNoteType(fNoteBeat));
 
   SetActiveFrame(
       fNoteBeat, *pActorOut, cache->m_fAnimationLength[part],
@@ -733,9 +734,9 @@ Actor* NoteDisplay::GetHoldActor(
 Sprite* NoteDisplay::GetHoldSprite(
     NoteColorSprite ncs[NUM_HoldType][NUM_ActiveType], NotePart part,
     float fNoteBeat, bool bIsRoll, bool bIsBeingHeld) {
-  const std::string& sColor = NoteTypeToString(BeatToNoteType(fNoteBeat));
   Sprite* pSpriteOut =
-      ncs[bIsRoll ? roll : hold][bIsBeingHeld ? active : inactive].Get(sColor);
+      ncs[bIsRoll ? roll : hold][bIsBeingHeld ? active : inactive].Get(
+          BeatToNoteType(fNoteBeat));
 
   SetActiveFrame(
       fNoteBeat, *pSpriteOut, cache->m_fAnimationLength[part],

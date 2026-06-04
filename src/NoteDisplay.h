@@ -55,11 +55,13 @@ struct NoteColorActor {
   ~NoteColorActor();
   void Load(
       const std::string& sButton, const std::string& sElement, PlayerNumber,
-      GameController, const std::string& sColor);
-  Actor* Get(const std::string& Color);
+      GameController, NoteType nt);
+  Actor* Get(NoteType nt);
 
  private:
-  std::map<std::string, NoteResource*> m_p;
+  // Indexed by NoteType. The note color is a small fixed enum, so a flat array
+  // replaces a per-arrow string-keyed std::map lookup in the draw loop.
+  NoteResource* m_p[NUM_NoteType];
 };
 
 struct NoteColorSprite {
@@ -67,11 +69,11 @@ struct NoteColorSprite {
   ~NoteColorSprite();
   void Load(
       const std::string& sButton, const std::string& sElement, PlayerNumber,
-      GameController, const std::string& sColor);
-  Sprite* Get(const std::string& Color);
+      GameController, NoteType nt);
+  Sprite* Get(NoteType nt);
 
  private:
-  std::map<std::string, NoteResource*> m_p;
+  NoteResource* m_p[NUM_NoteType];
 };
 /** @brief What types of holds are there? */
 enum HoldType {
