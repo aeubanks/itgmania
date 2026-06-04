@@ -778,8 +778,8 @@ bool RageDisplay_Legacy::UseOffscreenRenderTarget() {
 void RageDisplay_Legacy::ResolutionChanged() {
   // LOG->Warn( "RageDisplay_Legacy::ResolutionChanged" );
 
-  // GL state may be reset by a mode change; force the blend mode to re-apply.
-  m_LastBlendMode = BlendMode_Invalid;
+  // GL state may be reset by a mode change; force cached setters to re-apply.
+  InvalidateGLStateCache();
 
   /* Clear any junk that's in the framebuffer. */
   if (BeginFrame()) {
@@ -2619,10 +2619,10 @@ uintptr_t RageDisplay_Legacy::GetRenderTarget() {
 
 void RageDisplay_Legacy::SetRenderTarget(
     uintptr_t iTexture, bool bPreserveTexture) {
-  // A render target may live in a different GL context with its own blend
-  // state, so the cached blend mode no longer reflects reality on either the
-  // switch in or the switch back. Force the next SetBlendMode to re-apply.
-  m_LastBlendMode = BlendMode_Invalid;
+  // A render target may live in a different GL context with its own state, so
+  // cached GL state no longer reflects reality on either the switch in or the
+  // switch back. Force cached setters to re-apply.
+  InvalidateGLStateCache();
 
   if (iTexture == 0) {
     g_bInvertY = false;
@@ -2800,8 +2800,18 @@ bool RageDisplay_Legacy::SupportsPerVertexMatrixScale() {
 }
 
 void RageDisplay_Legacy::SetSphereEnvironmentMapping(TextureUnit tu, bool b) {
+  // Skip the redundant glActiveTexture + glEnable/glDisable when this unit is
+  // already in the requested state (most draws don't use sphere mapping, so
+  // this is called with b == false over and over).
+  if (tu < NUM_TextureUnit && m_LastSphereMap[tu] == (signed char)b) {
+    return;
+  }
+
   if (!SetTextureUnit(tu)) {
     return;
+  }
+  if (tu < NUM_TextureUnit) {
+    m_LastSphereMap[tu] = (signed char)b;
   }
 
   if (b) {

@@ -139,11 +139,21 @@ class RageDisplay_Legacy : public RageDisplay {
 
  private:
   RageTextureRenderTarget* offscreenRenderTarget;
-  // Last blend mode sent to GL, to skip redundant glBlendFunc/glBlendEquation
-  // when consecutive draws use the same mode (the common case). Reset to
-  // BlendMode_Invalid whenever GL blend state may have changed underneath us
-  // (context/render-target switch, resolution change, the glow blend hack).
+
+  // Cached GL state, to skip redundant state-change calls when consecutive
+  // draws request what's already set (the common case). Invalidated via
+  // InvalidateGLStateCache() wherever GL state may change underneath us
+  // (render-target/context switch, resolution change, the glow blend hack).
   BlendMode m_LastBlendMode = BlendMode_Invalid;
+  // Per-texture-unit sphere-environment-mapping enable; -1 means unknown.
+  signed char m_LastSphereMap[NUM_TextureUnit] = {-1, -1, -1, -1};
+
+  void InvalidateGLStateCache() {
+    m_LastBlendMode = BlendMode_Invalid;
+    for (signed char& s : m_LastSphereMap) {
+      s = -1;
+    }
+  }
 };
 
 #endif
