@@ -1004,6 +1004,40 @@ ActualVideoModeParams RageDisplay_Legacy::GetActualVideoModeParams() const {
 }
 
 static void SetupVertices(const RageSpriteVertex v[], int iNumVerts) {
+  /* Fast path: point GL straight at the interleaved RageSpriteVertex array
+   * using the struct stride, with no per-vertex copy into separate scratch
+   * arrays. The only catch is color: RageVColor is stored B,G,R,A (Direct3D
+   * order), so we need GL_BGRA color-array support to describe it in place.
+   * The caller always issues its draw call immediately after this returns,
+   * while v is still alive, so client-side array pointers into v are valid. */
+  static const bool bInterleaveColor =
+      !!GLEW_ARB_vertex_array_bgra || !!GLEW_EXT_vertex_array_bgra;
+  if (bInterleaveColor) {
+    const GLsizei stride = sizeof(RageSpriteVertex);
+
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(3, GL_FLOAT, stride, &v[0].p);
+
+    glEnableClientState(GL_COLOR_ARRAY);
+    glColorPointer(GL_BGRA, GL_UNSIGNED_BYTE, stride, &v[0].c);
+
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    glTexCoordPointer(2, GL_FLOAT, stride, &v[0].t);
+
+    if (GLEW_ARB_multitexture) {
+      glClientActiveTextureARB(GL_TEXTURE1_ARB);
+      glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+      glTexCoordPointer(2, GL_FLOAT, stride, &v[0].t);
+      glClientActiveTextureARB(GL_TEXTURE0_ARB);
+    }
+
+    glEnableClientState(GL_NORMAL_ARRAY);
+    glNormalPointer(GL_FLOAT, stride, &v[0].n);
+    return;
+  }
+
+  // Fallback for drivers without GL_BGRA vertex arrays: deinterleave into
+  // separate arrays, reordering the color to RGBA as we go.
   static float *Vertex, *Texture, *Normal;
   static GLubyte* Color;
   static int Size = 0;
