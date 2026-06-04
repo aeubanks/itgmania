@@ -680,9 +680,7 @@ void Actor::BeginDraw() {
   const float posZ = m_pTempState->pos.z;
 
   if (posX != 0 || posY != 0 || posZ != 0) {
-    RageMatrix m;
-    RageMatrixTranslate(&m, posX, posY, posZ);
-    DISPLAY->PreMultMatrix(m);
+    DISPLAY->Translate(posX, posY, posZ);
   }
 
   // Get the rotation of the actor
@@ -705,9 +703,7 @@ void Actor::BeginDraw() {
     const float scaleZ = m_pTempState->scale.z * m_baseScale.z;
 
     if (scaleX != 1 || scaleY != 1 || scaleZ != 1) {
-      RageMatrix m;
-      RageMatrixScale(&m, scaleX, scaleY, scaleZ);
-      DISPLAY->PreMultMatrix(m);
+      DISPLAY->Scale(scaleX, scaleY, scaleZ);
     }
   }
 
@@ -717,9 +713,7 @@ void Actor::BeginDraw() {
         SCALE(m_fHorizAlign, 0.0f, 1.0f, +m_size.x / 2.0f, -m_size.x / 2.0f);
     float fY =
         SCALE(m_fVertAlign, 0.0f, 1.0f, +m_size.y / 2.0f, -m_size.y / 2.0f);
-    RageMatrix m;
-    RageMatrixTranslate(&m, fX, fY, 0);
-    DISPLAY->PreMultMatrix(m);
+    DISPLAY->Translate(fX, fY, 0);
   }
 
   // Get the quaternion of the actor

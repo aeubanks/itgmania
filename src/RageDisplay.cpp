@@ -365,9 +365,16 @@ class MatrixStack {
   // Left multiply the current matrix with the computed scale
   // matrix. (transformation is about the local origin of the object)
   void ScaleLocal(float x, float y, float z) {
-    RageMatrix m;
-    RageMatrixScaling(&m, x, y, z);
-    MultMatrixLocal(m);
+    // Equivalent to MultMatrixLocal(scale(x,y,z)) but specialized: a local
+    // scale just scales rows 0-2 of the current matrix, avoiding a full 4x4
+    // multiply (this is hot -- every actor's draw transform comes through
+    // here).
+    RageMatrix& mat = stack.back();
+    for (int j = 0; j < 4; ++j) {
+      mat.m[0][j] *= x;
+      mat.m[1][j] *= y;
+      mat.m[2][j] *= z;
+    }
   }
 
   // Right multiply the current matrix with the computed translation
@@ -381,9 +388,14 @@ class MatrixStack {
   // Left multiply the current matrix with the computed translation
   // matrix. (transformation is about the local origin of the object)
   void TranslateLocal(float x, float y, float z) {
-    RageMatrix m;
-    RageMatrixTranslation(&m, x, y, z);
-    MultMatrixLocal(m);
+    // Equivalent to MultMatrixLocal(translate(x,y,z)) but specialized: a local
+    // translate only adds a combination of rows 0-2 into row 3, avoiding a full
+    // 4x4 multiply (hot path -- every actor's draw transform comes through
+    // here). Row indices match RageMath.cpp's mIJ == m[i][j] convention.
+    RageMatrix& mat = stack.back();
+    for (int j = 0; j < 4; ++j) {
+      mat.m[3][j] += x * mat.m[0][j] + y * mat.m[1][j] + z * mat.m[2][j];
+    }
   }
 
   void SkewX(float fAmount) {
