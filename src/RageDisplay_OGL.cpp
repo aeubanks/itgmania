@@ -808,6 +808,11 @@ std::string RageDisplay_Legacy::TryVideoMode(
     return err;  // failed to set video mode
   }
 
+  // The window now holds the actual params; cache the trilinear-filtering
+  // preference so the per-draw SetTextureFiltering doesn't copy the whole
+  // params struct (and its std::strings) every time.
+  m_bTrilinearFiltering = g_pWind->GetActualVideoModeParams().bTrilinearFiltering;
+
   /* Now that we've initialized, we can search for extensions.  Do this before
    * InvalidateObjects, since AllocateBuffers needs it. */
   SetupExtensions();
@@ -1741,7 +1746,7 @@ void RageDisplay_Legacy::SetTextureFiltering(TextureUnit tu, bool b) {
     glGetTexLevelParameteriv(GL_TEXTURE_2D, 1, GL_TEXTURE_WIDTH, &iWidth2);
     if (iWidth1 > 1 && iWidth2 != 0) {
       /* Mipmaps are enabled. */
-      if (g_pWind->GetActualVideoModeParams().bTrilinearFiltering) {
+      if (m_bTrilinearFiltering) {
         iMinFilter = GL_LINEAR_MIPMAP_LINEAR;
       } else {
         iMinFilter = GL_LINEAR_MIPMAP_NEAREST;

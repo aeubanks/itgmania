@@ -148,6 +148,13 @@ class RageDisplay_Legacy : public RageDisplay {
   // Per-texture-unit sphere-environment-mapping enable; -1 means unknown.
   signed char m_LastSphereMap[NUM_TextureUnit] = {-1, -1, -1, -1};
 
+  // Cached copy of the trilinear-filtering preference. SetTextureFiltering runs
+  // per draw and otherwise read this through GetActualVideoModeParams(), which
+  // returns a whole ActualVideoModeParams by value (copying its std::strings,
+  // i.e. heap traffic). The preference only changes on a video-mode set, so we
+  // refresh it in TryVideoMode instead. Not GL state, so not in the cache reset.
+  bool m_bTrilinearFiltering = false;
+
   void InvalidateGLStateCache() {
     m_LastBlendMode = BlendMode_Invalid;
     for (signed char& s : m_LastSphereMap) {
