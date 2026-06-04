@@ -32,7 +32,13 @@ LuaManager* LUA = nullptr;
 struct Impl {
   Impl() : g_pLock("Lua") {}
   std::vector<lua_State*> g_FreeStateList;
-  std::map<lua_State*, bool> g_ActiveStates;
+  // Active (Got but not yet Released) Lua states paired with whether this Get
+  // acquired the lock. The count is the Lua nesting depth -- a handful at most
+  // -- and Get/Release are nearly always LIFO, so a flat vector scanned from
+  // the back beats a std::map and, crucially, allocates nothing per call. The
+  // note render path plays many small Lua commands per frame, each a
+  // Get/Release pair, so a per-call map node malloc/free showed up hot.
+  std::vector<std::pair<lua_State*, bool>> g_ActiveStates;
 
   RageMutex g_pLock;
 };
@@ -337,7 +343,7 @@ Lua* LuaManager::Get() {
     pImpl->g_FreeStateList.pop_back();
   }
 
-  pImpl->g_ActiveStates[pRet] = bLocked;
+  pImpl->g_ActiveStates.emplace_back(pRet, bLocked);
   if (LUADEBUG) {
     LUADEBUG->ActivateState(pRet);
   }
@@ -351,9 +357,17 @@ void LuaManager::Release(Lua*& p) {
   pImpl->g_FreeStateList.push_back(p);
 
   ASSERT(lua_gettop(p) == 0);
-  ASSERT(pImpl->g_ActiveStates.find(p) != pImpl->g_ActiveStates.end());
-  bool bDoUnlock = pImpl->g_ActiveStates[p];
-  pImpl->g_ActiveStates.erase(p);
+  // Scan from the back: Get/Release is virtually always LIFO, so the match is
+  // the last entry and the erase is O(1).
+  std::vector<std::pair<lua_State*, bool>>& states = pImpl->g_ActiveStates;
+  size_t i = states.size();
+  while (i > 0 && states[i - 1].first != p) {
+    --i;
+  }
+  ASSERT(i > 0);
+  --i;
+  bool bDoUnlock = states[i].second;
+  states.erase(states.begin() + i);
 
   if (bDoUnlock) {
     pImpl->g_pLock.Unlock();
