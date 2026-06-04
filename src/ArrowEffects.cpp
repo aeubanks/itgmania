@@ -188,6 +188,15 @@ struct PerPlayerData {
   float m_fExpandSeconds;
   float m_fTanExpandSeconds;
 
+  // True if any m_fEffects entry is nonzero. Refreshed once per frame in
+  // Update(); lets the per-tap GetXPos/GetYPos skip their long list of
+  // per-effect checks entirely in the common case of no visual mods (speed
+  // mods live in m_fScrollSpeed/m_fAccels, not m_fEffects).
+  bool m_bAnyEffectActive;
+  // True if any per-column m_fBumpy entry is nonzero. GetZPos reads m_fBumpy
+  // in addition to m_fEffects, so its fast-path gate needs both.
+  bool m_bAnyBumpy;
+
   // m_prev_style is for checking whether ArrowEffects::Init needs to be
   // called.  Finding all the placed ArrowEffects is used and making sure
   // they all call Init after changing style is non-trivial and more likely
@@ -408,6 +417,24 @@ void ArrowEffects::Update() {
         GAMESTATE->m_pPlayerState[pn]->m_PlayerOptions.GetCurrent().m_fAccels;
 
     PerPlayerData& data = g_EffectData[pn];
+
+    data.m_bAnyEffectActive = false;
+    for (int i = 0; i < PlayerOptions::NUM_EFFECTS; ++i) {
+      if (effects[i] != 0) {
+        data.m_bAnyEffectActive = true;
+        break;
+      }
+    }
+
+    const float* bumpy =
+        GAMESTATE->m_pPlayerState[pn]->m_PlayerOptions.GetCurrent().m_fBumpy;
+    data.m_bAnyBumpy = false;
+    for (int i = 0; i < MAX_COLS_PER_PLAYER; ++i) {
+      if (bumpy[i] != 0) {
+        data.m_bAnyBumpy = true;
+        break;
+      }
+    }
 
     if (pStyle != data.m_prev_style) {
       Init(pn);
@@ -739,6 +766,15 @@ float ArrowEffects::GetYPos(
   }
 
   // TODO: Don't index by PlayerNumber.
+  PerPlayerData& data = g_EffectData[curr_options->m_pn];
+
+  // No visual mods active: every effect term below contributes 0, so the Y
+  // position is just the (reverse-adjusted) offset. Skip the effect checks.
+  if (!data.m_bAnyEffectActive) {
+    return QUANTIZE_ARROW_Y ? std::floor(f) : f;
+  }
+
+  // TODO: Don't index by PlayerNumber.
   const Style* pStyle =
       GAMESTATE->GetCurrentStyle(pPlayerState->m_PlayerNumber);
   const Style::ColumnInfo* pCols =
@@ -747,8 +783,6 @@ float ArrowEffects::GetYPos(
 
   // Doing the math with a precalculated result of 0 should be faster than
   // checking whether tipsy is on. -Kyz
-  // TODO: Don't index by PlayerNumber.
-  PerPlayerData& data = g_EffectData[curr_options->m_pn];
   f += fEffects[PlayerOptions::EFFECT_TIPSY] * data.m_tipsy_result[iCol];
   f +=
       fEffects[PlayerOptions::EFFECT_TAN_TIPSY] * data.m_tan_tipsy_result[iCol];
@@ -816,6 +850,13 @@ float ArrowEffects::GetXPos(
   const Style::ColumnInfo* pCols =
       pStyle->m_ColumnInfo[pPlayerState->m_PlayerNumber];
   PerPlayerData& data = g_EffectData[pPlayerState->m_PlayerNumber];
+
+  // No visual mods active: every effect term below contributes 0 (including
+  // the trailing Tiny multiply), so the X position is just the column's base
+  // offset. Skip the whole per-effect check list.
+  if (!data.m_bAnyEffectActive) {
+    return pCols[iColNum].fXOffset * pPlayerState->m_NotefieldZoom;
+  }
 
   if (fEffects[PlayerOptions::EFFECT_TORNADO] != 0) {
     fPixelOffsetFromCenter += CalculateTornadoOffsetFromMagnitude(
@@ -1379,6 +1420,12 @@ float ArrowEffects::GetZPos(
   const Style::ColumnInfo* pCols =
       pStyle->m_ColumnInfo[pPlayerState->m_PlayerNumber];
   PerPlayerData& data = g_EffectData[pPlayerState->m_PlayerNumber];
+
+  // No visual mods and no per-column bumpy: every term below contributes 0,
+  // so the Z position is 0. Skip the per-effect checks.
+  if (!data.m_bAnyEffectActive && !data.m_bAnyBumpy) {
+    return 0;
+  }
 
   if (fEffects[PlayerOptions::EFFECT_TORNADO_Z] != 0) {
     fZPos += CalculateTornadoOffsetFromMagnitude(
