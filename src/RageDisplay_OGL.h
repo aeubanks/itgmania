@@ -139,6 +139,11 @@ class RageDisplay_Legacy : public RageDisplay {
 
  private:
   RageTextureRenderTarget* offscreenRenderTarget;
+  // Last blend mode sent to GL, to skip redundant glBlendFunc/glBlendEquation
+  // when consecutive draws use the same mode (the common case). Reset to
+  // BlendMode_Invalid whenever GL blend state may have changed underneath us
+  // (context/render-target switch, resolution change, the glow blend hack).
+  BlendMode m_LastBlendMode = BlendMode_Invalid;
 };
 
 #endif

@@ -778,6 +778,9 @@ bool RageDisplay_Legacy::UseOffscreenRenderTarget() {
 void RageDisplay_Legacy::ResolutionChanged() {
   // LOG->Warn( "RageDisplay_Legacy::ResolutionChanged" );
 
+  // GL state may be reset by a mode change; force the blend mode to re-apply.
+  m_LastBlendMode = BlendMode_Invalid;
+
   /* Clear any junk that's in the framebuffer. */
   if (BeginFrame()) {
     EndFrame();
@@ -1701,6 +1704,8 @@ void RageDisplay_Legacy::SetTextureMode(TextureUnit tu, TextureMode tm) {
         /* This is changing blend state, instead of texture state, which
          * isn't great, but it's better than doing nothing. */
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+        // We bypassed SetBlendMode, so its cache no longer reflects GL state.
+        m_LastBlendMode = BlendMode_Invalid;
         return;
       }
 
@@ -1841,6 +1846,14 @@ bool RageDisplay_Legacy::IsEffectModeSupported(EffectMode effect) {
 }
 
 void RageDisplay_Legacy::SetBlendMode(BlendMode mode) {
+  // Skip redundant GL state changes: most consecutive draws use the same blend
+  // mode. The cache is invalidated wherever blend state may change behind our
+  // back (SetRenderTarget, ResolutionChanged, the TextureMode_Glow hack).
+  if (mode == m_LastBlendMode) {
+    return;
+  }
+  m_LastBlendMode = mode;
+
   glEnable(GL_BLEND);
 
   if (glBlendEquation != nullptr) {
@@ -2606,6 +2619,11 @@ uintptr_t RageDisplay_Legacy::GetRenderTarget() {
 
 void RageDisplay_Legacy::SetRenderTarget(
     uintptr_t iTexture, bool bPreserveTexture) {
+  // A render target may live in a different GL context with its own blend
+  // state, so the cached blend mode no longer reflects reality on either the
+  // switch in or the switch back. Force the next SetBlendMode to re-apply.
+  m_LastBlendMode = BlendMode_Invalid;
+
   if (iTexture == 0) {
     g_bInvertY = false;
     glFrontFace(GL_CCW);
