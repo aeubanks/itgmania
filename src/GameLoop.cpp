@@ -22,6 +22,7 @@
 #include "RageThreads.h"
 #include "RageTimer.h"
 #include "RageUtil.h"
+#include "Screen.h"
 #include "ScreenManager.h"
 #include "ThemeManager.h"
 #include "arch/ArchHooks/ArchHooks.h"
@@ -266,6 +267,26 @@ void GameLoop::UpdateAllButDraw(bool bRunningFromVBLANK) {
   }
 
   fDeltaTime *= g_fUpdateRate;
+
+  // --- Profiling hack: auto fast-forward the menus -------------------------
+  // Run everything except gameplay at an accelerated rate so the hands-free
+  // auto-walk through the menus (see Simply Love's ScreenSystemLayer
+  // autopilot) blasts by, while the gameplay being profiled still runs at
+  // real time. This is the programmatic equivalent of holding TAB on the
+  // menus. Set kMenuFastForward to 1.0f to disable. (Holding TAB still
+  // stacks on top of this.)
+  {
+    static const float kMenuFastForward = 4.0f;
+    Screen* pTopScreen =
+        (SCREENMAN != nullptr) ? SCREENMAN->GetTopScreen() : nullptr;
+    if (pTopScreen != nullptr) {
+      const std::string& sScreen = pTopScreen->GetName();
+      if (sScreen != "ScreenGameplay" && sScreen != "ScreenGameplayShared") {
+        fDeltaTime *= kMenuFastForward;
+      }
+    }
+  }
+  // -------------------------------------------------------------------------
 
   // Update SOUNDMAN early (before any RageSound::GetPosition calls), to flush
   // position data.
