@@ -574,15 +574,21 @@ bool NoteDisplay::DrawTapsInRange(
                        const NoteData::TrackMap::const_iterator& tapit) {
     int tap_row = tapit->first;
     const TapNote& tn = tapit->second;
+    const float fBeat = NoteRowToVisibleBeat(m_pPlayerState, tap_row);
+
+    // Compute the Y offset once and reuse it for both the on-screen cull and
+    // the actual draw. GetYOffset does a timing-data search (binary search plus
+    // segment walk); previously IsOnScreen computed it to cull and DrawTap
+    // recomputed the identical value, doubling the per-arrow timing work.
+    const float fYOffset =
+        ArrowEffects::GetYOffset(m_pPlayerState, column_args.column, fBeat);
 
     // TRICKY: If boomerang is on, then all notes in the range
     // [first_row,last_row] aren't necessarily visible.
     // Test every note to make sure it's on screen before drawing.
-    if (!IsOnScreen(
-            NoteRowToBeat(tap_row), column_args.column,
-            field_args.draw_pixels_after_targets,
-            field_args.draw_pixels_before_targets)) {
-      return;  // skip
+    if (fYOffset > field_args.draw_pixels_before_targets ||
+        fYOffset < field_args.draw_pixels_after_targets) {
+      return;  // off screen, skip
     }
 
     // Hm, this assert used to pass the first and last rows to draw, when it
@@ -632,8 +638,7 @@ bool NoteDisplay::DrawTapsInRange(
 
     bool is_addition = (tn.source == TapNoteSource_Addition);
     DrawTap(
-        tn, field_args, column_args,
-        NoteRowToVisibleBeat(m_pPlayerState, tap_row), hold_begins_on_this_beat,
+        tn, field_args, column_args, fBeat, fYOffset, hold_begins_on_this_beat,
         roll_begins_on_this_beat, is_addition,
         in_selection_range ? field_args.selection_glow : field_args.fail_fade);
 
@@ -1499,7 +1504,7 @@ void NoteDisplay::DrawActor(
 
 void NoteDisplay::DrawTap(
     const TapNote& tn, const NoteFieldRenderArgs& field_args,
-    const NoteColumnRenderArgs& column_args, float fBeat,
+    const NoteColumnRenderArgs& column_args, float fBeat, float fYOffset,
     bool bOnSameRowAsHoldStart, bool bOnSameRowAsRollStart, bool bIsAddition,
     float fPercentFadeToFail) {
   Actor* pActor = nullptr;
@@ -1558,8 +1563,8 @@ void NoteDisplay::DrawTap(
     pActor->HandleMessage(msg);
   }
 
-  const float fYOffset =
-      ArrowEffects::GetYOffset(m_pPlayerState, column_args.column, fBeat);
+  // fYOffset is computed once by the caller (DrawTapsInRange) and reused here,
+  // avoiding a redundant GetYOffset timing-data search per arrow per frame.
   // this is the line that forces the (1,1,1,x) part of the noteskin diffuse -aj
   DrawActor(
       tn, pActor, part, field_args, column_args, fYOffset, fBeat, bIsAddition,

@@ -213,7 +213,7 @@ class NoteDisplay {
    * @param fFadeInPercentOfDrawFar when to start fading in. */
   void DrawTap(
       const TapNote& tn, const NoteFieldRenderArgs& field_args,
-      const NoteColumnRenderArgs& column_args, float fBeat,
+      const NoteColumnRenderArgs& column_args, float fBeat, float fYOffset,
       bool bOnSameRowAsHoldStart, bool bOnSameRowAsRollBeat, bool bIsAddition,
       float fPercentFadeToFail);
   void DrawHold(
