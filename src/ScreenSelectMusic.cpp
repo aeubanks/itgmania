@@ -28,6 +28,7 @@
 #include "MessageManager.h"
 #include "ModsGroup.h"
 #include "OptionsList.h"
+#include "PCSCReader.h"
 #include "PlayerNumber.h"
 #include "PlayerOptions.h"
 #include "PlayerState.h"
@@ -452,6 +453,38 @@ void ScreenSelectMusic::Update(float fDeltaTime) {
         m_timerIdleComment.Ago() >= IDLE_COMMENT_SECONDS) {
       SOUND->PlayOnceFromAnnouncer(m_sName + " IdleComment");
       m_timerIdleComment.GetDeltaTime();
+    }
+
+    auto cardId = PCSCReader::PollCardId();
+    if (cardId.has_value()) {
+      FOREACH_PlayerNumber(pn) {
+        if (GAMESTATE->IsHumanPlayer(pn) &&
+            !PROFILEMAN->IsPersistentProfile(pn)) {
+          auto profileIndex = PROFILEMAN->FindLocalProfileIndexByNfcId(*cardId);
+          if (!profileIndex.has_value()) {
+            std::string newProfileId;
+            if (PROFILEMAN->CreateLocalProfile(
+                    "NFC" + cardId->substr(0, 5), newProfileId)) {
+              PROFILEMAN->GetLocalProfile(newProfileId)->m_sNfcId = *cardId;
+              PROFILEMAN->SaveLocalProfile(newProfileId);
+              profileIndex =
+                  PROFILEMAN->GetLocalProfileIndexFromID(newProfileId);
+            }
+          }
+          if (profileIndex.has_value()) {
+            PROFILEMAN->m_sDefaultLocalProfileID[pn].Set(
+                PROFILEMAN->GetLocalProfileIDFromIndex(*profileIndex));
+            PROFILEMAN->LoadLocalProfileFromMachine(pn);
+            GAMESTATE->LoadCurrentSettingsFromProfile(pn);
+            Message msg(MessageIDToString(Message_PlayerProfileSet));
+            msg.SetParam("Player", pn);
+            MESSAGEMAN->Broadcast(msg);
+            MESSAGEMAN->Broadcast("RefreshCreditText");
+            AfterMusicChange();
+          }
+          break;
+        }
+      }
     }
   }
 

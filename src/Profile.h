@@ -234,6 +234,7 @@ class Profile {
   // General data
   static std::string MakeGuid();
 
+  std::string m_sNfcId;
   std::string m_sGuid;
   std::map<std::string, std::string> m_sDefaultModifiers;
   SortOrder m_SortOrder;

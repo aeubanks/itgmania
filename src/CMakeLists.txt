@@ -102,6 +102,10 @@ if(CMAKE_GENERATOR STREQUAL "Xcode")
 endif()
 
 # Compilation flags per project here.
+if(WITH_NFC)
+  set_source_files_properties("PCSCReader.cpp" PROPERTIES COMPILE_DEFINITIONS "WITH_NFC")
+endif()
+
 target_compile_definitions("${SM_EXE_NAME}" PRIVATE $<$<CONFIG:Debug>:DEBUG>)
 target_compile_definitions("${SM_EXE_NAME}" PRIVATE $<$<CONFIG:Release>:RELEASE>)
 target_compile_definitions("${SM_EXE_NAME}" PRIVATE $<$<CONFIG:MinSizeRel>:MINSIZEREL>)
@@ -411,6 +415,9 @@ if(WIN32)
               "dbghelp.lib"
               "setupapi.lib"
               "hid.lib")
+  if(WITH_NFC)
+    list(APPEND SMDATA_LINK_LIB "winscard.lib")
+  endif()
 
   sm_add_link_flag("${SM_EXE_NAME}" "/LIBPATH:\"${SM_EXTERN_DIR}/ffmpeg-w32/${SM_WIN32_ARCH}\"")
   sm_add_link_flag("${SM_EXE_NAME}"
@@ -452,6 +459,9 @@ elseif(APPLE)
               "${MAC_FRAME_COREMEDIA}"
               "${MAC_FRAME_COREVIDEO}"
               "${MAC_FRAME_VIDEOTOOLBOX}")
+  if(WITH_NFC)
+    list(APPEND SMDATA_LINK_LIB "-framework PCSC")
+  endif()
 else() # Unix / Linux TODO: Remember to find and locate the zip archive files.
   list(APPEND SMDATA_LINK_LIB
               "${SM_FFMPEG_LIB}/libavformat.a"
@@ -499,6 +509,10 @@ else() # Unix / Linux TODO: Remember to find and locate the zip archive files.
 
   list(APPEND SMDATA_LINK_LIB ${XRANDR_LIBRARIES} ${XINERAMA_LIBRARIES})
 
+  if(WITH_NFC)
+    list(APPEND SMDATA_LINK_LIB ${PCSCLITE_LIBRARIES})
+  endif()
+
   list(REMOVE_DUPLICATES SMDATA_LINK_LIB)
 endif()
 
@@ -524,6 +538,9 @@ else()
     endif()
 
     list(APPEND SM_INCLUDE_DIRS "${LIBUSB_INCLUDE_DIR}")
+    if(WITH_NFC)
+      list(APPEND SM_INCLUDE_DIRS "${PCSCLITE_INCLUDE_DIRS}")
+    endif()
   endif()
 endif()
 

@@ -1234,6 +1234,16 @@ int ProfileManager::GetNumLocalProfiles() const {
   return g_vLocalProfile.size();
 }
 
+std::optional<int> ProfileManager::FindLocalProfileIndexByNfcId(
+    const std::string& sNfcId) const {
+  for (int i = 0; i < (int)g_vLocalProfile.size(); ++i) {
+    if (g_vLocalProfile[i].profile.m_sNfcId == sNfcId) {
+      return i;
+    }
+  }
+  return std::nullopt;
+}
+
 void ProfileManager::SetStatsPrefix(const std::string& prefix) {
   m_stats_prefix = prefix;
   for (size_t i = 0; i < g_vLocalProfile.size(); ++i) {

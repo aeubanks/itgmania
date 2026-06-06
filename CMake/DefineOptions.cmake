@@ -43,6 +43,8 @@ option(
 option(WITH_LOGGING_TIMING_DATA
        "Build with logging all Add and Erase Segment calls." OFF)
 
+option(WITH_NFC "Enable NFC reader support." OFF)
+
 if(MSVC)
   # Turn this option on to enable using the Texture Font Generator.
   option(

@@ -1,6 +1,7 @@
 #ifndef ProfileManager_H
 #define ProfileManager_H
 
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -53,6 +54,8 @@ class ProfileManager {
       std::vector<std::string>& vsProfileDisplayNamesOut) const;
   int GetLocalProfileIndexFromID(std::string sProfileID) const;
   int GetNumLocalProfiles() const;
+  std::optional<int> FindLocalProfileIndexByNfcId(
+      const std::string& sNfcId) const;
 
   std::string GetStatsPrefix() { return m_stats_prefix; }
   void SetStatsPrefix(const std::string& prefix);

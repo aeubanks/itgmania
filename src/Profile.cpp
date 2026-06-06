@@ -1546,6 +1546,9 @@ void Profile::SaveEditableDataToDir(std::string sDir) const {
   ini.SetValue(
       "Editable", "IgnoreStepCountCalories", m_IgnoreStepCountCalories);
   ini.SetValue("Editable", "IsMale", m_IsMale);
+  if (!m_sNfcId.empty()) {
+    ini.SetValue("Editable", "NfcId", m_sNfcId);
+  }
 
   ini.WriteFile(sDir + EDITABLE_INI);
 }
@@ -1752,6 +1755,7 @@ ProfileLoadResult Profile::LoadEditableDataFromDir(std::string sDir) {
   ini.GetValue(
       "Editable", "IgnoreStepCountCalories", m_IgnoreStepCountCalories);
   ini.GetValue("Editable", "IsMale", m_IsMale);
+  ini.GetValue("Editable", "NfcId", m_sNfcId);
 
   // This is data that the user can change, so we have to validate it.
   std::wstring wstr = RStringToWstring(m_sDisplayName);

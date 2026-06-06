@@ -283,6 +283,10 @@ elseif(LINUX OR BSD)
   endif()
 
   find_package(udev REQUIRED)
+  if(WITH_NFC)
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(PCSCLITE REQUIRED libpcsclite)
+  endif()
 endif(WIN32) # LINUX OR BSD, APPLE
 
 configure_file("${SM_SRC_DIR}/config.hpp.in"

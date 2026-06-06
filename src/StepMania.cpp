@@ -7,6 +7,7 @@
 #include "EnumHelper.h"
 #include "GameConstantsAndTypes.h"
 #include "GameInput.h"
+#include "PCSCReader.h"
 #include "PlayerNumber.h"
 #include "Preference.h"
 #include "RageException.h"
@@ -257,6 +258,8 @@ void StepMania::ResetPreferences() {
  * initialization, due to an object failing to initialize, in which case some of
  * these may still be nullptr. */
 void ShutdownGame() {
+  PCSCReader::Stop();
+
   /* First, tell SOUNDMAN that we're shutting down. This signals sound drivers
    * to stop sounds, which we want to do before any threads that may have
    * started sounds are closed; this prevents annoying DirectSound glitches and
@@ -983,6 +986,8 @@ int sm_main(int argc, char* argv[]) {
   }
 
   CodeDetector::RefreshCacheItems();
+
+  PCSCReader::Start();
 
   // Run the main loop.
   GameLoop::RunGameLoop();
