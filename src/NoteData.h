@@ -1,7 +1,7 @@
 #ifndef NOTE_DATA_H
 #define NOTE_DATA_H
 
-#include <map>
+#include <deque>
 #include <set>
 #include <utility>
 #include <vector>
@@ -35,11 +35,26 @@
 /** @brief Holds data about the notes that the player is supposed to hit. */
 class NoteData {
  public:
-  typedef std::map<int, TapNote> TrackMap;
-  typedef std::map<int, TapNote>::iterator iterator;
-  typedef std::map<int, TapNote>::const_iterator const_iterator;
-  typedef std::map<int, TapNote>::reverse_iterator reverse_iterator;
-  typedef std::map<int, TapNote>::const_reverse_iterator const_reverse_iterator;
+  typedef std::pair<int, TapNote> RowTapNote;
+  typedef std::deque<RowTapNote> TrackMap;
+  typedef TrackMap::iterator iterator;
+  typedef TrackMap::const_iterator const_iterator;
+  typedef TrackMap::reverse_iterator reverse_iterator;
+  typedef TrackMap::const_reverse_iterator const_reverse_iterator;
+
+  // A [begin, end) view over a single track's tap notes, usable directly in a
+  // range-based for loop. Each element is a {row, TapNote} pair.
+  class ConstTrackRange {
+   public:
+    ConstTrackRange(const_iterator begin, const_iterator end)
+        : begin_(begin), end_(end) {}
+    const_iterator begin() const { return begin_; }
+    const_iterator end() const { return end_; }
+
+   private:
+    const_iterator begin_;
+    const_iterator end_;
+  };
 
   NoteData() : m_TapNotes() {}
 
@@ -55,17 +70,15 @@ class NoteData {
   const_reverse_iterator rend(int iTrack) const {
     return m_TapNotes[iTrack].rend();
   }
-  iterator lower_bound(int iTrack, int iRow) {
-    return m_TapNotes[iTrack].lower_bound(iRow);
-  }
-  const_iterator lower_bound(int iTrack, int iRow) const {
-    return m_TapNotes[iTrack].lower_bound(iRow);
-  }
-  iterator upper_bound(int iTrack, int iRow) {
-    return m_TapNotes[iTrack].upper_bound(iRow);
-  }
-  const_iterator upper_bound(int iTrack, int iRow) const {
-    return m_TapNotes[iTrack].upper_bound(iRow);
+  iterator lower_bound(int iTrack, int iRow);
+  const_iterator lower_bound(int iTrack, int iRow) const;
+  iterator upper_bound(int iTrack, int iRow);
+  const_iterator upper_bound(int iTrack, int iRow) const;
+  // The tap notes in the given track with row in [iStartRow, iEndRow).
+  ConstTrackRange GetTapNotesInTrackRange(
+      int iTrack, int iStartRow, int iEndRow) const {
+    return ConstTrackRange(
+        lower_bound(iTrack, iStartRow), lower_bound(iTrack, iEndRow));
   }
   void swap(NoteData& nd) {
     m_TapNotes.swap(nd.m_TapNotes);
@@ -220,24 +233,17 @@ class NoteData {
   /* Return the note at the given track and row.  Row may be out of
    * range; pretend the song goes on with TAP_EMPTYs indefinitely. */
   inline const TapNote& GetTapNote(unsigned track, int row) const {
-    const TrackMap& mapTrack = m_TapNotes[track];
-    TrackMap::const_iterator iter = mapTrack.find(row);
-    if (iter != mapTrack.end()) {
+    const_iterator iter = FindTapNote(track, row);
+    if (iter != end(track)) {
       return iter->second;
     } else {
       return TAP_EMPTY;
     }
   }
 
-  inline iterator FindTapNote(unsigned iTrack, int iRow) {
-    return m_TapNotes[iTrack].find(iRow);
-  }
-  inline const_iterator FindTapNote(unsigned iTrack, int iRow) const {
-    return m_TapNotes[iTrack].find(iRow);
-  }
-  void RemoveTapNote(unsigned iTrack, iterator it) {
-    m_TapNotes[iTrack].erase(it);
-  }
+  iterator FindTapNote(unsigned iTrack, int iRow);
+  const_iterator FindTapNote(unsigned iTrack, int iRow) const;
+  iterator RemoveTapNote(unsigned iTrack, iterator it);
 
   /**
    * @brief Return an iterator range for [rowBegin,rowEnd).

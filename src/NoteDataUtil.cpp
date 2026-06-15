@@ -45,19 +45,21 @@ NoteType NoteDataUtil::GetSmallestNoteTypeForMeasure(
 
 NoteType NoteDataUtil::GetSmallestNoteTypeInRange(
     const NoteData& n, int iStartIndex, int iEndIndex) {
+  std::vector<int> rows;
+  for (int t = 0; t < n.GetNumTracks(); ++t) {
+    for (const auto& note : n.GetTapNotesInTrackRange(t, iStartIndex, iEndIndex)) {
+      rows.push_back(note.first);
+    }
+  }
+
   // probe to find the smallest note type
   FOREACH_ENUM(NoteType, nt) {
     float fBeatSpacing = NoteTypeToBeat(nt);
     int iRowSpacing = std::lrint(fBeatSpacing * ROWS_PER_BEAT);
 
     bool bFoundSmallerNote = false;
-    // for each index in this measure
-    FOREACH_NONEMPTY_ROW_ALL_TRACKS_RANGE(n, i, iStartIndex, iEndIndex) {
-      if (i % iRowSpacing == 0) {
-        continue;  // skip
-      }
-
-      if (!n.IsRowEmpty(i)) {
+    for (int i : rows) {
+      if (i % iRowSpacing != 0) {
         bFoundSmallerNote = true;
         break;
       }
@@ -281,21 +283,18 @@ static void LoadFromSMNoteDataStringWithPlayer(
   // Make sure we don't have any hold notes that didn't find a tail.
   for (int t = 0; t < out.GetNumTracks(); t++) {
     NoteData::iterator begin = out.begin(t);
-    NoteData::iterator lEnd = out.end(t);
-    while (begin != lEnd) {
-      NoteData::iterator next = Increment(begin);
+    while (begin != out.end(t)) {
       const TapNote& tn = begin->second;
       if (tn.type == TapNoteType_HoldHead && tn.iDuration == MAX_NOTE_ROW) {
-        int iRow = begin->first;
         LOG->UserLog(
             "", "",
             "While loading .sm/.ssc note data, there was an unmatched 2 at "
             "beat %f",
-            NoteRowToBeat(iRow));
-        out.RemoveTapNote(t, begin);
+            NoteRowToBeat(begin->first));
+        begin = out.RemoveTapNote(t, begin);
+      } else {
+        ++begin;
       }
-
-      begin = next;
     }
   }
   out.RevalidateATIs(std::vector<int>(), false);
@@ -356,11 +355,12 @@ void NoteDataUtil::LoadFromSMNoteDataString(
 
 void NoteDataUtil::InsertHoldTails(NoteData& inout) {
   for (int t = 0; t < inout.GetNumTracks(); t++) {
-    NoteData::iterator begin = inout.begin(t), end = inout.end(t);
-
-    for (; begin != end; ++begin) {
-      int iRow = begin->first;
-      const TapNote& tn = begin->second;
+    /* Collect the tails to insert in a first pass. We can't insert while
+     * iterating, since inserting into the track invalidates our iterators. */
+    std::vector<std::pair<int, TapNote>> tails;
+    for (NoteData::iterator it = inout.begin(t); it != inout.end(t); ++it) {
+      int iRow = it->first;
+      const TapNote& tn = it->second;
       if (tn.type != TapNoteType_HoldHead) {
         continue;
       }
@@ -368,11 +368,15 @@ void NoteDataUtil::InsertHoldTails(NoteData& inout) {
       TapNote tail = tn;
       tail.type = TapNoteType_HoldTail;
 
-      /* If iDuration is 0, we'd end up overwriting the head with the tail
-       * (and invalidating our iterator). Empty hold notes aren't valid. */
+      /* If iDuration is 0, we'd end up overwriting the head with the tail.
+       * Empty hold notes aren't valid. */
       ASSERT(tn.iDuration != 0);
 
-      inout.SetTapNote(t, iRow + tn.iDuration, tail);
+      tails.push_back({iRow + tn.iDuration, tail});
+    }
+
+    for (const std::pair<int, TapNote>& tail : tails) {
+      inout.SetTapNote(t, tail.first, tail.second);
     }
   }
 }
@@ -398,6 +402,11 @@ void NoteDataUtil::GetSMNoteDataString(
     if (partNum++ != 0) {
       sRet.append("&\n");
     }
+    std::vector<NoteData::const_iterator> iters;
+    iters.reserve(nd.GetNumTracks());
+    for (int t = 0; t < nd.GetNumTracks(); ++t) {
+      iters.push_back(nd.begin(t));
+    }
     for (int m = 0; m <= iLastMeasure; ++m)  // foreach measure
     {
       if (m) {
@@ -422,7 +431,12 @@ void NoteDataUtil::GetSMNoteDataString(
 
       for (int r = iMeasureStartRow; r <= iMeasureLastRow; r += iRowSpacing) {
         for (int t = 0; t < nd.GetNumTracks(); ++t) {
-          const TapNote& tn = nd.GetTapNote(t, r);
+          NoteData::const_iterator& it = iters[t];
+          while (it != nd.end(t) && it->first < r) {
+            ++it;
+          }
+          const TapNote& tn =
+              (it != nd.end(t) && it->first == r) ? it->second : TAP_EMPTY;
           char c;
           switch (tn.type) {
             case TapNoteType_Empty:
@@ -1201,7 +1215,7 @@ void NoteDataUtil::RemoveAllButPlayer(NoteData& inout, PlayerNumber pn) {
 
     while (i != inout.end(track)) {
       if (i->second.pn != pn && i->second.pn != PLAYER_INVALID) {
-        inout.RemoveTapNote(track, i++);
+        i = inout.RemoveTapNote(track, i);
       } else {
         ++i;
       }
@@ -2944,7 +2958,7 @@ void NoteDataUtil::RemoveAllTapsOfType(
   for (int t = 0; t < ndInOut.GetNumTracks(); t++) {
     for (NoteData::iterator iter = ndInOut.begin(t); iter != ndInOut.end(t);) {
       if (iter->second.type == typeToRemove) {
-        ndInOut.RemoveTapNote(t, iter++);
+        iter = ndInOut.RemoveTapNote(t, iter);
       } else {
         ++iter;
       }
@@ -2959,7 +2973,7 @@ void NoteDataUtil::RemoveAllTapsExceptForType(
   for (int t = 0; t < ndInOut.GetNumTracks(); t++) {
     for (NoteData::iterator iter = ndInOut.begin(t); iter != ndInOut.end(t);) {
       if (iter->second.type != typeToKeep) {
-        ndInOut.RemoveTapNote(t, iter++);
+        iter = ndInOut.RemoveTapNote(t, iter);
       } else {
         ++iter;
       }
