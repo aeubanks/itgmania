@@ -89,7 +89,6 @@ endif()
 include(ExternalProject)
 
 find_package(nasm)
-find_package(yasm)
 find_package(Iconv)
 
 find_package(Threads)
@@ -181,9 +180,9 @@ elseif(MACOSX)
   find_library(MAC_FRAME_COREVIDEO CoreVideo ${CMAKE_SYSTEM_FRAMEWORK_PATH} REQUIRED)
   find_library(MAC_FRAME_VIDEOTOOLBOX VideoToolbox ${CMAKE_SYSTEM_FRAMEWORK_PATH} REQUIRED)
 
-  if(NOT YASM_FOUND AND NOT NASM_FOUND)
+  if(NOT NASM_FOUND)
     message(FATAL_ERROR
-      "Neither NASM nor YASM were found. Please install at least one of them."
+      "NASM was not found. Please install it."
     )
   endif()
 elseif(LINUX OR BSD)
@@ -260,9 +259,9 @@ elseif(LINUX OR BSD)
       )
   endif()
 
-  if(NOT YASM_FOUND AND NOT NASM_FOUND)
+  if(NOT NASM_FOUND)
     message(FATAL_ERROR
-      "Neither NASM nor YASM were found. Please install at least one of them."
+      "NASM was not found. Please install it."
     )
   endif()
 

@@ -8,11 +8,18 @@ list(APPEND FFMPEG_CONFIGURE
             "--disable-avfilter"
             "--disable-devices"
             "--disable-doc"
+            "--disable-encoders"
+            "--disable-faan"
             "--disable-filters"
+            "--disable-hwaccels"
+            "--disable-iamf"
+            "--disable-lsp"
             "--disable-lzma"
+            "--disable-muxers"
             "--disable-network"
-            "--disable-postproc"
+            "--disable-pixelutils"
             "--disable-programs"
+            "--disable-protocols"
             "--disable-swresample"
             "--disable-vaapi"
             "--disable-bzlib"
@@ -40,6 +47,9 @@ if(CMAKE_C_FLAGS)
 endif()
 if(CMAKE_CXX_FLAGS)
   list(APPEND FFMPEG_CONFIGURE "--extra-cxxflags=${CMAKE_CXX_FLAGS}")
+endif()
+if(CMAKE_EXE_LINKER_FLAGS)
+  list(APPEND FFMPEG_CONFIGURE "--extra-ldflags=${CMAKE_EXE_LINKER_FLAGS}")
 endif()
 
 if(CMAKE_POSITION_INDEPENDENT_CODE)
