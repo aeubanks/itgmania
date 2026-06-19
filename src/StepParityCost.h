@@ -50,49 +50,52 @@ class StepParityCost {
   /// @param previousRow The row preceding row, or nullptr if there is none
   /// @return The computed cost
   float getActionCost(
-      State* initialState, State* resultState, Row& row, Row* previousRow,
-      const FootPlacement& columns, float elapsedTime);
+      const State* initialState, const State* resultState, const Row& row,
+      const Row* previousRow, const FootPlacement& columns, float elapsedTime);
 
  private:
-  float calcMineCost(State* resultState, Row& row, int columnCount);
+  float calcMineCost(const State* resultState, const Row& row, int columnCount);
   float calcHoldSwitchCost(
-      State* initialState, State* resultState, Row& row, int columnCount);
+      const State* initialState, const State* resultState, const Row& row,
+      int columnCount);
   float calcBracketTapCost(
-      State* initialState, Row& row, int leftHeel, int leftToe, int rightHeel,
-      int rightToe, float elapsedTime);
+      const State* initialState, const Row& row, int leftHeel, int leftToe,
+      int rightHeel, int rightToe, float elapsedTime);
   float calcBracketJackCost(
-      State* resultState, bool movedLeft, bool movedRight, bool jackedLeft,
-      bool jackedRight, bool didJump);
+      const State* resultState, bool movedLeft, bool movedRight,
+      bool jackedLeft, bool jackedRight, bool didJump);
   float calcDoublestepCost(
-      State* initialState, State* resultState, Row& row, Row* previousRow,
-      bool movedLeft, bool movedRight, bool jackedLeft, bool jackedRight,
-      bool didJump);
+      const State* initialState, const State* resultState, const Row& row,
+      const Row* previousRow, bool movedLeft, bool movedRight, bool jackedLeft,
+      bool jackedRight, bool didJump);
   float calcSlowBracketCost(
-      Row& row, bool movedLeft, bool movedRight, float elapsedTime);
-  float calcTwistedFootCost(State* resultState);
-  float calcMissedFootswitchCost(Row& row, bool jackedLeft, bool jackedRight);
-  float calcFacingCosts(State* resultState);
-  float calcSpinCosts(State* initialState, State* resultState);
+      const Row& row, bool movedLeft, bool movedRight, float elapsedTime);
+  float calcTwistedFootCost(const State* resultState);
+  float calcMissedFootswitchCost(
+      const Row& row, bool jackedLeft, bool jackedRight);
+  float calcFacingCosts(const State* resultState);
+  float calcSpinCosts(const State* initialState, const State* resultState);
   float calcFootswitchCost(
-      State* initialState, const FootPlacement& columns, Row& row,
+      const State* initialState, const FootPlacement& columns, const Row& row,
       float elapsedTime, int columnCount);
   float calcSideswitchCost(
-      State* initialState, State* resultState, const FootPlacement& columns);
+      const State* initialState, const State* resultState,
+      const FootPlacement& columns);
   float calcJackCost(
       bool movedLeft, bool movedRight, bool jackedLeft, bool jackedRight,
       float elapsedTime);
   float calcBigMovementsQuicklyCost(
-      State* initialState, State* resultState, float elapsedTime);
+      const State* initialState, const State* resultState, float elapsedTime);
 
   bool didDoubleStep(
-      State* initialState, Row& row, Row* previousRow, bool movedLeft,
-      bool jackedLeft, bool movedRight, bool jackedRight);
+      const State* initialState, const Row& row, const Row* previousRow,
+      bool movedLeft, bool jackedLeft, bool movedRight, bool jackedRight);
   bool didJackLeft(
-      State* initialState, State* resultState, int leftHeel, int leftToe,
-      bool movedLeft, bool didJump);
+      const State* initialState, const State* resultState, int leftHeel,
+      int leftToe, bool movedLeft, bool didJump);
   bool didJackRight(
-      State* initialState, State* resultState, int rightHeel, int rightToe,
-      bool movedRight, bool didJump);
+      const State* initialState, const State* resultState, int rightHeel,
+      int rightToe, bool movedRight, bool didJump);
 };
 };  // namespace StepParity
 
