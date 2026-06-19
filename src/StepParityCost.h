@@ -1,6 +1,10 @@
 #ifndef STEP_PARITY_COST_H
 #define STEP_PARITY_COST_H
 
+#include <cstdint>
+#include <unordered_map>
+#include <utility>
+
 #include "StepParityDatastructs.h"
 
 namespace StepParity {
@@ -39,8 +43,13 @@ class StepParityCost {
  private:
   const StageLayout* layout;
 
+  std::unordered_map<uint64_t, float> actionCostCache;
+
  public:
-  StepParityCost(const StageLayout* _layout) : layout(_layout) {}
+  StepParityCost(const StageLayout* _layout) : layout(_layout) {
+    // The cache can grow very big, reserve up front.
+    actionCostCache.reserve(1 << 14);
+  }
 
   /// @brief Computes and returns a cost value for the player moving from
   /// initialState to resultState.

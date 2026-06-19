@@ -192,6 +192,9 @@ struct Row {
   int rowIndex = 0;
   int columnCount = 0;
   int noteCount = 0;
+
+  mutable uint64_t actionCostHash = 0;
+
   Row() : Row(0) {};
 
   Row(int _columnCount) {

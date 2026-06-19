@@ -2,12 +2,16 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
+#include <cstring>
 #include <vector>
 
 #include "NoteTypes.h"
 #include "StepParityDatastructs.h"
 
 using namespace StepParity;
+
+static const bool VALIDATE_ACTION_COST_CACHE = false;
 
 namespace {
 template <typename T>
@@ -19,11 +23,77 @@ bool isEmpty(const std::vector<T>& vec, int columnCount) {
   }
   return true;
 }
+
+void hashCombine(uint64_t& seed, uint64_t value) {
+  // Diffuse bits with MurmurHash3 fmix64-style finalizer.
+  value *= 0xff51afd7ed558ccdULL;
+  value ^= value >> 33;
+  value *= 0xc4ceb9fe1a85ec53ULL;
+
+  seed ^= value;
+  seed = seed * 0x9e3779b97f4a7c15ULL + 0x165667b19e3779f9ULL;
+}
+
+void hashCombineFloat(uint64_t& seed, float value) {
+  uint32_t bits;
+  std::memcpy(&bits, &value, sizeof(bits));
+  hashCombine(seed, bits);
+}
+
+uint64_t computeRowHash(const Row& row) {
+  uint64_t hash = 0;
+  hashCombine(hash, row.note_mask);
+  hashCombine(hash, row.hold_mask);
+  hashCombine(hash, row.mine_mask);
+  hashCombine(hash, row.fake_mine_mask);
+  hashCombine(hash, static_cast<uint64_t>(row.noteCount));
+  for (const IntermediateNoteData& note : row.notes) {
+    hashCombine(hash, static_cast<uint64_t>(note.type));
+  }
+  for (const IntermediateNoteData& hold : row.holds) {
+    hashCombine(hash, static_cast<uint64_t>(hold.type));
+    if (hold.type != TapNoteType_Empty) {
+      hashCombineFloat(hash, hold.beat + hold.hold_length - row.beat);
+    }
+  }
+  return hash;
+}
+
+uint64_t hashRow(const Row& row) {
+  if (row.actionCostHash == 0) {
+    row.actionCostHash = computeRowHash(row);
+  }
+  return row.actionCostHash;
+}
+
+uint64_t packColumns(const FootPlacement& columns) {
+  uint64_t packed = 0;
+  for (size_t i = 0; i < columns.size(); i++) {
+    packed |= (static_cast<uint64_t>(columns[i]) & 0x7) << (3 * i);
+  }
+  return packed;
+}
 }  // namespace
 
 float StepParityCost::getActionCost(
     const State* initialState, const State* resultState, const Row& row,
     const Row* previousRow, const FootPlacement& columns, float elapsedTime) {
+  uint64_t cacheKey = 0;
+  hashCombine(cacheKey, reinterpret_cast<uintptr_t>(initialState));
+  hashCombine(cacheKey, reinterpret_cast<uintptr_t>(resultState));
+  hashCombine(cacheKey, packColumns(columns));
+  hashCombine(cacheKey, hashRow(row));
+  hashCombine(cacheKey, previousRow != nullptr ? hashRow(*previousRow) : 0);
+  hashCombine(cacheKey, previousRow != nullptr ? 1 : 0);
+  hashCombineFloat(
+      cacheKey, previousRow != nullptr ? row.beat - previousRow->beat : 0.0f);
+  hashCombineFloat(cacheKey, elapsedTime);
+  auto cached = actionCostCache.find(cacheKey);
+  bool cacheHit = cached != actionCostCache.end();
+  if (cacheHit && !VALIDATE_ACTION_COST_CACHE) {
+    return cached->second;
+  }
+
   int columnCount = row.columnCount;
 
   float cost = 0;
@@ -77,6 +147,14 @@ float StepParityCost::getActionCost(
       calcJackCost(movedLeft, movedRight, jackedLeft, jackedRight, elapsedTime);
   cost += calcBigMovementsQuicklyCost(initialState, resultState, elapsedTime);
 
+  if (cacheHit) {
+    ASSERT_M(
+        cached->second == cost,
+        "StepParityCost action cost cache returned a stale result");
+    return cost;
+  }
+
+  actionCostCache[cacheKey] = cost;
   return cost;
 }
 
