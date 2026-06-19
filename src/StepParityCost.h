@@ -1,8 +1,6 @@
 #ifndef STEP_PARITY_COST_H
 #define STEP_PARITY_COST_H
 
-#include <vector>
-
 #include "StepParityDatastructs.h"
 
 namespace StepParity {
@@ -48,12 +46,12 @@ class StepParityCost {
   /// initialState to resultState.
   /// @param initialState The starting position of the player
   /// @param resultState The end position of the player
-  /// @param rows
-  /// @param rowIndex The index of the row represented by resultState
+  /// @param row The row represented by resultState
+  /// @param previousRow The row preceding row, or nullptr if there is none
   /// @return The computed cost
   float getActionCost(
-      State* initialState, State* resultState, std::vector<Row>& rows,
-      const FootPlacement& columns, int rowIndex, float elapsedTime);
+      State* initialState, State* resultState, Row& row, Row* previousRow,
+      const FootPlacement& columns, float elapsedTime);
 
  private:
   float calcMineCost(State* resultState, Row& row, int columnCount);
@@ -66,9 +64,9 @@ class StepParityCost {
       State* resultState, bool movedLeft, bool movedRight, bool jackedLeft,
       bool jackedRight, bool didJump);
   float calcDoublestepCost(
-      State* initialState, State* resultState, std::vector<Row>& rows,
-      int rowIndex, bool movedLeft, bool movedRight, bool jackedLeft,
-      bool jackedRight, bool didJump);
+      State* initialState, State* resultState, Row& row, Row* previousRow,
+      bool movedLeft, bool movedRight, bool jackedLeft, bool jackedRight,
+      bool didJump);
   float calcSlowBracketCost(
       Row& row, bool movedLeft, bool movedRight, float elapsedTime);
   float calcTwistedFootCost(State* resultState);
@@ -87,7 +85,7 @@ class StepParityCost {
       State* initialState, State* resultState, float elapsedTime);
 
   bool didDoubleStep(
-      State* initialState, std::vector<Row>& rows, int rowIndex, bool movedLeft,
+      State* initialState, Row& row, Row* previousRow, bool movedLeft,
       bool jackedLeft, bool movedRight, bool jackedRight);
   bool didJackLeft(
       State* initialState, State* resultState, int leftHeel, int leftToe,

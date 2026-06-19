@@ -22,9 +22,8 @@ bool isEmpty(const std::vector<T>& vec, int columnCount) {
 }  // namespace
 
 float StepParityCost::getActionCost(
-    State* initialState, State* resultState, std::vector<Row>& rows,
-    const FootPlacement& columns, int rowIndex, float elapsedTime) {
-  Row& row = rows[rowIndex];
+    State* initialState, State* resultState, Row& row, Row* previousRow,
+    const FootPlacement& columns, float elapsedTime) {
   int columnCount = row.columnCount;
 
   float cost = 0;
@@ -64,7 +63,7 @@ float StepParityCost::getActionCost(
   cost += calcBracketJackCost(
       resultState, movedLeft, movedRight, jackedLeft, jackedRight, didJump);
   cost += calcDoublestepCost(
-      initialState, resultState, rows, rowIndex, movedLeft, movedRight,
+      initialState, resultState, row, previousRow, movedLeft, movedRight,
       jackedLeft, jackedRight, didJump);
   cost += calcSlowBracketCost(row, movedLeft, movedRight, elapsedTime);
   cost += calcTwistedFootCost(resultState);
@@ -214,16 +213,16 @@ float StepParityCost::calcBracketJackCost(
 }
 
 float StepParityCost::calcDoublestepCost(
-    State* initialState, State* resultState, std::vector<Row>& rows,
-    int rowIndex, bool movedLeft, bool movedRight, bool jackedLeft,
-    bool jackedRight, bool didJump) {
+    State* initialState, State* resultState, Row& row, Row* previousRow,
+    bool movedLeft, bool movedRight, bool jackedLeft, bool jackedRight,
+    bool didJump) {
   if ((movedLeft == movedRight) || resultState->holding_mask != 0 || didJump) {
     return 0.0f;
   }
 
   float cost = 0;
   bool doublestepped = didDoubleStep(
-      initialState, rows, rowIndex, movedLeft, jackedLeft, movedRight,
+      initialState, row, previousRow, movedLeft, jackedLeft, movedRight,
       jackedRight);
 
   if (doublestepped) {
@@ -455,9 +454,8 @@ float StepParityCost::calcBigMovementsQuicklyCost(
 }
 
 bool StepParityCost::didDoubleStep(
-    State* initialState, std::vector<Row>& rows, int rowIndex, bool movedLeft,
+    State* initialState, Row& row, Row* previousRow, bool movedLeft,
     bool jackedLeft, bool movedRight, bool jackedRight) {
-  Row& row = rows[rowIndex];
   bool doublestepped = false;
   if (movedLeft && !jackedLeft &&
       ((initialState->didTheFootMove[LEFT_HEEL] &&
@@ -474,8 +472,8 @@ bool StepParityCost::didDoubleStep(
     doublestepped = true;
   }
 
-  if (rowIndex - 1 > -1) {
-    StepParity::Row& lastRow = rows[rowIndex - 1];
+  if (previousRow != nullptr) {
+    StepParity::Row& lastRow = *previousRow;
     for (StepParity::IntermediateNoteData hold : lastRow.holds) {
       if (hold.type == TapNoteType_Empty) {
         continue;
