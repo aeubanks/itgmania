@@ -479,7 +479,7 @@ local CodeDetectorCodes = {
 	-- operator menu from title screen
 	OperatorMenu = {
 		default = "",
-		dance = "",
+		dance = "MenuLeft,MenuDown,MenuUp,MenuRight,MenuDown,MenuUp,MenuLeft,MenuDown,MenuUp,MenuRight",
 	},
 };
 
