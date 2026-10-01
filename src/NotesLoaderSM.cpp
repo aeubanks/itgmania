@@ -1064,8 +1064,7 @@ bool SMLoader::LoadNoteDataFromSimfile(const std::string& path, Steps& out) {
   return false;
 }
 
-bool SMLoader::LoadFromSimfile(
-    const std::string& sPath, Song& out, bool bFromCache) {
+bool SMLoader::LoadFromSimfile(const std::string& sPath, Song& out) {
   // LOG->Trace( "Song::LoadFromSMFile(%s)", sPath.c_str() );
 
   MsdFile msd;
@@ -1124,7 +1123,7 @@ bool SMLoader::LoadFromSimfile(
   ProcessBPMsAndStops(
       out.m_SongTiming, reused_song_info.BPMChanges, reused_song_info.Stops);
 
-  TidyUpData(out, bFromCache);
+  TidyUpData(out, false);
   return true;
 }
 

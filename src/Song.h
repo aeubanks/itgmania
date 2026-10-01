@@ -121,10 +121,9 @@ class Song {
   /**
    * @brief Save to the new SSC file format.
    * @param sPath the path where we're saving the file.
-   * @param bSavingCache a flag to determine if we're saving cache data.
+   * @param autosave a flag to determine if we're saving an autosave file.
    */
-  bool SaveToSSCFile(
-      std::string sPath, bool bSavingCache, bool autosave = false);
+  bool SaveToSSCFile(std::string sPath, bool autosave = false);
   /** @brief Save to the SSC and SM files no matter what. */
   void Save(bool autosave = false);
   /**
@@ -355,6 +354,12 @@ class Song {
   void TidyUpData(
       bool fromCache, const std::set<std::string>& blacklistedImages);
 
+  /**
+   * @brief Derive the song directory, name, group, and source profile from a
+   * directory. Used when beginning a load and when rebuilding the song after a
+   * failed cache read. sDir must end in a slash. */
+  void SetSongDirAndGroup(const std::string& sDir, ProfileSlot from_profile);
+
  public:
   const std::vector<BackgroundChange>& GetBackgroundChanges(
       BackgroundLayer bl) const;
@@ -438,6 +443,9 @@ class Song {
   bool HasStepsTypeAndDifficulty(StepsType st, Difficulty dc) const;
   // TODO: Allow for a non const version.
   const std::vector<Steps*>& GetAllSteps() const { return m_vpSteps; }
+  const std::vector<Steps*>& GetUnknownStyleSteps() const {
+    return m_UnknownStyleSteps;
+  }
   const std::vector<Steps*>& GetStepsByStepsType(StepsType st) const {
     return m_vpStepsByType[st];
   }

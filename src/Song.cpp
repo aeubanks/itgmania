@@ -50,6 +50,7 @@
 #include "RageThreads.h"
 #include "RageUtil.h"
 #include "RageUtil_AutoPtr.h"
+#include "SongCacheBinary.h"
 #include "SongCacheIndex.h"
 #include "SongManager.h"
 #include "SongUtil.h"
@@ -66,7 +67,7 @@
  * @brief The internal version of the cache for StepMania.
  *
  * Increment this value to invalidate the current cache. */
-const int FILE_CACHE_VERSION = 232;
+const int FILE_CACHE_VERSION = 234;
 
 /** @brief How long does a song sample last by default? */
 const float DEFAULT_MUSIC_SAMPLE_LENGTH = 12.f;
@@ -253,7 +254,7 @@ std::string Song::GetCacheFilePath() const {
   return SongCacheIndex::GetCacheFilePath("Songs", m_sSongDir);
 }
 
-// Get a path to the SM containing data for this song. It might be a cache file.
+// Get the path to the simfile containing this song's data.
 const std::string& Song::GetSongFilePath() const {
   ASSERT_M(
       !m_sSongFileName.empty(),
@@ -263,26 +264,10 @@ const std::string& Song::GetSongFilePath() const {
   return m_sSongFileName;
 }
 
-/* If PREFSMAN->m_bFastLoad is true, always load from cache if possible.
- * Don't read the contents of sDir if we can avoid it. That means we can't call
- * HasMusic(), HasBanner() or GetHashForDirectory().
- * If true, check the directory hash and reload the song from scratch if it's
- * changed.
- */
-bool Song::LoadFromSongDir(
-    std::string sDir, bool load_autosave, ProfileSlot from_profile) {
-  //	LOG->Trace( "Song::LoadFromSongDir(%s)", sDir.c_str() );
-  ASSERT_M(sDir != "", "Songs can't be loaded from an empty directory!");
-
-  // make sure there is a trailing slash at the end of sDir
-  if (Right(sDir, 1) != "/") {
-    sDir += "/";
-  }
-
-  // save song dir
+void Song::SetSongDirAndGroup(
+    const std::string& sDir, ProfileSlot from_profile) {
+  ASSERT_M(Right(sDir, 1) == "/", sDir);
   m_sSongDir = sDir;
-
-  bool use_cache = true;
 
   std::vector<std::string> sDirectoryParts;
   split(m_sSongDir, "/", sDirectoryParts, false);
@@ -296,10 +281,32 @@ bool Song::LoadFromSongDir(
     ASSERT(m_sGroupName != "");
   } else {
     LOG->Trace("Loading song from profile2.");
-    m_LoadedFromProfile = from_profile;
     m_sGroupName = sDir.substr(1, sDir.find('/', 1) - 1);
-    use_cache = false;
   }
+  m_LoadedFromProfile = from_profile;
+}
+
+/* If PREFSMAN->m_bFastLoad is true, always load from cache if possible.
+ * Don't read the contents of sDir if we can avoid it. That means we can't call
+ * HasMusic(), HasBanner() or GetHashForDirectory().
+ * If true, check the directory hash and reload the song from scratch if it's
+ * changed.
+ */
+bool Song::LoadFromSongDir(
+    std::string sDir, bool load_autosave, ProfileSlot from_profile) {
+  ASSERT_M(sDir != "", "Songs can't be loaded from an empty directory!");
+  ASSERT_M(
+      m_vpSteps.empty() && m_UnknownStyleSteps.empty(),
+      "LoadFromSongDir expects an empty Song; call Reset() first.");
+
+  // make sure there is a trailing slash at the end of sDir
+  if (Right(sDir, 1) != "/") {
+    sDir += "/";
+  }
+
+  SetSongDirAndGroup(sDir, from_profile);
+
+  bool use_cache = m_LoadedFromProfile == ProfileSlot_Invalid;
 
   std::string cache_file_path;
   if (m_LoadedFromProfile == ProfileSlot_Invalid) {
@@ -320,22 +327,18 @@ bool Song::LoadFromSongDir(
   }
 
   if (use_cache) {
-    /*
-    LOG->Trace("Loading '%s' from cache file '%s'.",
-                       m_sSongDir.c_str(),
-                       GetCacheFilePath().c_str());
-    */
-    SSCLoader loaderSSC;
-    bool bLoadedFromCache =
-        loaderSSC.LoadFromSimfile(cache_file_path, *this, true);
+    bool bLoadedFromCache = SongCacheBinary::Read(*this, cache_file_path);
 
-    // If cache loading failed entirely (e.g. stale dir cache says cache file
-    // exists after it was removed), fall back to parsing source files.
+    // If cache loading failed (missing, stale, incompatible, or a corrupt body
+    // that Read rejected), fall back to parsing the source files.
     if (!bLoadedFromCache) {
       LOG->Warn(
           "Couldn't load cache for '%s'; falling back to source simfiles.",
           m_sSongDir.c_str());
+      // Read() can fail after partially filling the song, so discard it and
+      // rebuild the location fields from the inputs before parsing source.
       Reset();
+      SetSongDirAndGroup(sDir, from_profile);
       use_cache = false;
     }
 
@@ -630,6 +633,9 @@ bool Song::LoadAutosaveFile() {
     return true;
   }
   // Loading the autosave failed, reload the original. -Kyz
+  // LoadFromSongDir assumes an empty Song, and the failed autosave load left
+  // this one populated, so clear it first.
+  Reset();
   LoadFromSongDir(dir, false);
   return false;
 }
@@ -1225,7 +1231,7 @@ void Song::Save(bool autosave) {
   TranslateTitles();
 
   // Save the new files. These calls make backups on their own.
-  if (!SaveToSSCFile(GetSongFilePath(), false, autosave)) {
+  if (!SaveToSSCFile(GetSongFilePath(), autosave)) {
     return;
   }
   // Skip saving the cache, sm, and .old files if we are autosaving.  The
@@ -1270,11 +1276,8 @@ bool Song::SaveToSMFile() {
   return NotesWriterSM::Write(sPath, *this, vpStepsToSave);
 }
 
-bool Song::SaveToSSCFile(std::string sPath, bool bSavingCache, bool autosave) {
-  std::string path = sPath;
-  if (!bSavingCache) {
-    path = SetExtension(sPath, "ssc");
-  }
+bool Song::SaveToSSCFile(std::string sPath, bool autosave) {
+  std::string path = SetExtension(sPath, "ssc");
   if (autosave) {
     path = SetExtension(sPath, "ats");
   }
@@ -1282,7 +1285,7 @@ bool Song::SaveToSSCFile(std::string sPath, bool bSavingCache, bool autosave) {
   LOG->Trace("Song::SaveToSSCFile('%s')", path.c_str());
 
   // If the file exists, make a backup.
-  if (!bSavingCache && !autosave && IsAFile(path)) {
+  if (!autosave && IsAFile(path)) {
     FileCopy(path, path + ".old");
   }
 
@@ -1297,20 +1300,18 @@ bool Song::SaveToSSCFile(std::string sPath, bool bSavingCache, bool autosave) {
       continue;
     }
 
-    if (!bSavingCache) {
-      pSteps->SetFilename(path);
-    }
+    pSteps->SetFilename(path);
     vpStepsToSave.push_back(pSteps);
   }
   for (Steps* s : m_UnknownStyleSteps) {
     vpStepsToSave.push_back(s);
   }
 
-  if (bSavingCache || autosave) {
-    return NotesWriterSSC::Write(path, *this, vpStepsToSave, bSavingCache);
+  if (autosave) {
+    return NotesWriterSSC::Write(path, *this, vpStepsToSave);
   }
 
-  if (!NotesWriterSSC::Write(path, *this, vpStepsToSave, bSavingCache)) {
+  if (!NotesWriterSSC::Write(path, *this, vpStepsToSave)) {
     return false;
   }
 
@@ -1358,7 +1359,7 @@ bool Song::SaveToCacheFile() {
   }
   SONGINDEX->AddCacheIndex(m_sSongDir, GetHashForDirectory(m_sSongDir));
   const std::string sPath = GetCacheFilePath();
-  return SaveToSSCFile(sPath, true);
+  return SongCacheBinary::Write(*this, sPath);
 }
 
 bool Song::SaveToDWIFile() {

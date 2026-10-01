@@ -185,13 +185,12 @@ bool Steps::IsNoteDataEmpty() const {
 }
 
 bool Steps::GetNoteDataFromSimfile() {
-  // Replace the line below with the Steps' cache file.
   std::string stepFile = this->GetFilename();
   std::string extension = GetExtension(stepFile);
   MakeLower(extension);  // must do this because the code is expecting lowercase
 
   if (extension.empty() || extension == "ssc" ||
-      extension == "ats")  // remember cache files.
+      extension == "ats")  // .ssc and autosave files use the SSC loader.
   {
     SSCLoader loader;
     if (!loader.LoadNoteDataFromSimfile(stepFile, *this)) {
@@ -201,7 +200,7 @@ bool Steps::GetNoteDataFromSimfile() {
       that remove or tamper with the .ssc file later on
       complain of blank steps in the editor after reloading.
       Despite the blank steps being well justified since
-      the cache files contain only the SSC step file,
+      the .ssc file contains only the SSC step data,
       give the user some leeway and search for a .sm replacement
       */
       SMLoader backup_loader;
