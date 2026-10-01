@@ -50,6 +50,7 @@
 #include "RageThreads.h"
 #include "RageUtil.h"
 #include "RageUtil_AutoPtr.h"
+#include "SongCacheBinary.h"
 #include "SongCacheIndex.h"
 #include "SongManager.h"
 #include "SongUtil.h"
@@ -66,7 +67,7 @@
  * @brief The internal version of the cache for StepMania.
  *
  * Increment this value to invalidate the current cache. */
-const int FILE_CACHE_VERSION = 232;
+const int FILE_CACHE_VERSION = 233;
 
 /** @brief How long does a song sample last by default? */
 const float DEFAULT_MUSIC_SAMPLE_LENGTH = 12.f;
@@ -325,17 +326,25 @@ bool Song::LoadFromSongDir(
                        m_sSongDir.c_str(),
                        GetCacheFilePath().c_str());
     */
-    SSCLoader loaderSSC;
-    bool bLoadedFromCache =
-        loaderSSC.LoadFromSimfile(cache_file_path, *this, true);
+    bool bLoadedFromCache = SongCacheBinary::Read(*this, cache_file_path);
 
     // If cache loading failed entirely (e.g. stale dir cache says cache file
-    // exists after it was removed), fall back to parsing source files.
+    // exists after it was removed), fall back to parsing source files. Reset()
+    // wipes the directory fields set above, so put them back: the source parse
+    // needs them (BGCHANGES handling uses the song dir).
     if (!bLoadedFromCache) {
       LOG->Warn(
           "Couldn't load cache for '%s'; falling back to source simfiles.",
           m_sSongDir.c_str());
+      const std::string song_dir = m_sSongDir;
+      const std::string song_name = m_sSongName;
+      const std::string group_name = m_sGroupName;
+      const ProfileSlot profile = m_LoadedFromProfile;
       Reset();
+      m_sSongDir = song_dir;
+      m_sSongName = song_name;
+      m_sGroupName = group_name;
+      m_LoadedFromProfile = profile;
       use_cache = false;
     }
 
@@ -1358,7 +1367,7 @@ bool Song::SaveToCacheFile() {
   }
   SONGINDEX->AddCacheIndex(m_sSongDir, GetHashForDirectory(m_sSongDir));
   const std::string sPath = GetCacheFilePath();
-  return SaveToSSCFile(sPath, true);
+  return SongCacheBinary::Write(*this, sPath);
 }
 
 bool Song::SaveToDWIFile() {

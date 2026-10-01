@@ -438,6 +438,9 @@ class Song {
   bool HasStepsTypeAndDifficulty(StepsType st, Difficulty dc) const;
   // TODO: Allow for a non const version.
   const std::vector<Steps*>& GetAllSteps() const { return m_vpSteps; }
+  const std::vector<Steps*>& GetUnknownStyleSteps() const {
+    return m_UnknownStyleSteps;
+  }
   const std::vector<Steps*>& GetStepsByStepsType(StepsType st) const {
     return m_vpStepsByType[st];
   }
