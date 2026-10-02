@@ -27,7 +27,7 @@ namespace {
 // Bump this whenever the layout below changes. FILE_CACHE_VERSION also has to
 // be bumped so that existing cache files get regenerated instead of being
 // rejected one by one.
-const uint32_t LAYOUT_VERSION = 1;
+const uint32_t LAYOUT_VERSION = 2;
 const char MAGIC[8] = {'I', 'T', 'G', 'S', 'S', 'C', 'B', '\0'};
 // SpeedSegment::UNIT_BEATS and UNIT_SECONDS.
 const uint32_t kNumSpeedUnits = 2;
@@ -540,6 +540,15 @@ void WriteSteps(Writer& w, const Steps& steps) {
     w.F32(v);
   }
 
+  const std::vector<std::vector<float>>& npsGraph = steps.GetAllNpsGraph();
+  w.U32(static_cast<uint32_t>(npsGraph.size()));
+  for (const std::vector<float>& playerGraph : npsGraph) {
+    w.U32(static_cast<uint32_t>(playerGraph.size()));
+    for (float v : playerGraph) {
+      w.F32(v);
+    }
+  }
+
   const std::vector<NoteAnnotationCache>& annotations =
       steps.GetNoteAnnotationCaches();
   w.U32(static_cast<uint32_t>(annotations.size()));
@@ -621,6 +630,19 @@ void ReadSteps(Reader& r, Song& song) {
     peakNps.push_back(r.F32());
   }
   steps->SetPeakNps(peakNps);
+
+  std::vector<std::vector<float>> npsGraph;
+  const uint32_t graphPlayers = r.Count(4);
+  npsGraph.reserve(graphPlayers);
+  for (uint32_t i = 0; i < graphPlayers; ++i) {
+    const uint32_t values = r.Count(4);
+    std::vector<float> playerGraph(values);
+    for (uint32_t j = 0; j < values; ++j) {
+      playerGraph[j] = r.F32();
+    }
+    npsGraph.push_back(playerGraph);
+  }
+  steps->SetNpsGraph(npsGraph);
 
   const uint32_t annotationCount = r.Count(4);
   std::vector<NoteAnnotationCache> annotations;

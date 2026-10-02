@@ -12,7 +12,6 @@
 // beats long, which matches what the Simply Love stream/density display
 // expects. Charts with other time signatures will have their notes/NPS
 // bucketed into 4-beat "measures" rather than their true measures.
-static const int BEATS_PER_MEASURE = 4;
 static const int ROWS_PER_MEASURE = ROWS_PER_BEAT * BEATS_PER_MEASURE;
 
 std::string MeasureInfo::ToString() const {

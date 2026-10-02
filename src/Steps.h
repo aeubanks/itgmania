@@ -178,6 +178,7 @@ class Steps {
   void SetRadarValues(const RadarValues v[NUM_PLAYERS]);
   void SetTechCounts(const TechCounts ts[NUM_PLAYERS]);
   void SetNpsPerMeasure(std::vector<std::vector<float>>& npsPerMeasure);
+  void SetNpsGraph(std::vector<std::vector<float>>& npsGraph);
   void SetNotesPerMeasure(std::vector<std::vector<int>>& notesPerMeasure);
   void SetNoteAnnotations(std::vector<NoteAnnotationCache>& noteAnnotations);
   void SetPeakNps(std::vector<float>& peakNps);
@@ -219,6 +220,8 @@ class Steps {
   }
 
   void CalculateMeasureInfo(const NoteData& noteData);
+  // Needs the Song's first/last second to be finalized first.
+  void CalculateNpsGraph();
   const std::vector<NoteAnnotation>& GetNoteAnnotations(PlayerNumber pn) const;
   const std::vector<NoteAnnotationCache>& GetNoteAnnotationCaches() const;
   std::vector<std::vector<NoteAnnotation>> GetAllNoteAnnotations() const;
@@ -227,6 +230,10 @@ class Steps {
     return Real()->m_NpsPerMeasure;
   }
   const std::vector<float>& GetNpsPerMeasure(PlayerNumber pn) const;
+  const std::vector<std::vector<float>>& GetAllNpsGraph() const {
+    return Real()->m_NpsGraph;
+  }
+  const std::vector<float>& GetNpsGraph(PlayerNumber pn) const;
   const std::vector<std::vector<int>>& GetAllNotesPerMeasures() const {
     return Real()->m_NotesPerMeasure;
   };
@@ -338,6 +345,8 @@ class Steps {
   TechCounts m_TechCounts[NUM_PLAYERS];
 
   std::vector<std::vector<float>> m_NpsPerMeasure;
+  // Per-player flattened normalized (x, y) density graph points.
+  std::vector<std::vector<float>> m_NpsGraph;
   std::vector<std::vector<int>> m_NotesPerMeasure;
 
   std::vector<NoteAnnotationCache> m_NoteAnnotations;

@@ -67,7 +67,7 @@
  * @brief The internal version of the cache for StepMania.
  *
  * Increment this value to invalidate the current cache. */
-const int FILE_CACHE_VERSION = 233;
+const int FILE_CACHE_VERSION = 234;
 
 /** @brief How long does a song sample last by default? */
 const float DEFAULT_MUSIC_SAMPLE_LENGTH = 12.f;
@@ -1212,6 +1212,11 @@ void Song::ReCalculateStepStatsAndLastSecond(bool wipeNoteData) {
   // Yes, for some reason we can have freaky stuff take place here.
   this->firstSecond = (localFirst < localLast) ? localFirst : 0;
   this->lastSecond = localLast;
+
+  // Rebuild the density graph now that first/last second are final.
+  for (Steps* pSteps : m_vpSteps) {
+    pSteps->CalculateNpsGraph();
+  }
 }
 
 // Return whether the song is playable in the given style.

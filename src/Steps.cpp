@@ -14,6 +14,7 @@
 #include "Steps.h"
 
 #include <algorithm>
+#include <cmath>
 #include <cstddef>
 #include <optional>
 #include <sstream>
@@ -356,6 +357,7 @@ void Steps::CalculateStepStats(float fMusicLengthSeconds) {
   this->CalculateTechCounts(tempNoteData);
   this->CalculateMeasureInfo(tempNoteData);
   this->CalculateGrooveStatsHash(tempNoteData);
+  this->CalculateNpsGraph();
 }
 
 void Steps::CalculateRadarValues(
@@ -471,6 +473,67 @@ void Steps::CalculateMeasureInfo(const NoteData& tempNoteData) {
     m_NotesPerMeasure.push_back(mi.notesPerMeasure);
     m_NpsPerMeasure.push_back(mi.npsPerMeasure);
     m_PeakNps.push_back(mi.peakNps);
+  }
+}
+
+void Steps::CalculateNpsGraph() {
+  if (parent != nullptr) {
+    return;
+  }
+
+  m_NpsGraph.clear();
+
+  if (m_pSong == nullptr) {
+    return;
+  }
+
+  TimingData* timing = this->GetTimingData();
+  const float first = timing->GetElapsedTimeFromBeatNoOffset(0);
+  const float last = m_pSong->GetLastSecondNoOffset();
+  const float range = last - first;
+  if (range <= 0.0f) {
+    return;
+  }
+
+  for (std::size_t pn = 0; pn < m_NpsPerMeasure.size(); ++pn) {
+    const std::vector<float>& npsPerMeasure = m_NpsPerMeasure[pn];
+    const float peak = this->GetPeakNps(static_cast<PlayerNumber>(pn));
+
+    std::vector<float> graph;
+    if (peak > 0.0f) {
+      auto measureX = [&](std::size_t measure) {
+        const float seconds = timing->GetElapsedTimeFromBeatNoOffset(
+            static_cast<float>(BEATS_PER_MEASURE) *
+            static_cast<float>(measure));
+        return (seconds - first) / range;
+      };
+      auto normY = [&](std::size_t measure) {
+        return std::round(npsPerMeasure[measure] / peak * 10000.0f) / 10000.0f;
+      };
+
+      const std::size_t count = npsPerMeasure.size();
+      std::size_t i = 0;
+      // Skip measures before the first note.
+      while (i < count && npsPerMeasure[i] <= 0.0f) {
+        ++i;
+      }
+      while (i < count) {
+        const std::size_t firstInRun = i;
+        const float y = normY(i);
+        std::size_t lastInRun = i;
+        while (lastInRun + 1 < count && normY(lastInRun + 1) == y) {
+          ++lastInRun;
+        }
+        graph.push_back(measureX(firstInRun));
+        graph.push_back(y);
+        if (lastInRun > firstInRun) {
+          graph.push_back(measureX(lastInRun));
+          graph.push_back(y);
+        }
+        i = lastInRun + 1;
+      }
+    }
+    m_NpsGraph.push_back(std::move(graph));
   }
 }
 
@@ -600,6 +663,7 @@ void Steps::DeAutogen(bool bCopyNoteData) {
 
   m_NpsPerMeasure.assign(
       Real()->m_NpsPerMeasure.begin(), Real()->m_NpsPerMeasure.end());
+  m_NpsGraph.assign(Real()->m_NpsGraph.begin(), Real()->m_NpsGraph.end());
   m_NotesPerMeasure.assign(
       Real()->m_NotesPerMeasure.begin(), Real()->m_NotesPerMeasure.end());
 
@@ -734,6 +798,11 @@ void Steps::SetNoteAnnotations(
 void Steps::SetNpsPerMeasure(std::vector<std::vector<float>>& npsPerMeasure) {
   DeAutogen();
   m_NpsPerMeasure.assign(npsPerMeasure.begin(), npsPerMeasure.end());
+}
+
+void Steps::SetNpsGraph(std::vector<std::vector<float>>& npsGraph) {
+  DeAutogen();
+  m_NpsGraph.assign(npsGraph.begin(), npsGraph.end());
 }
 
 void Steps::SetNotesPerMeasure(std::vector<std::vector<int>>& notesPerMeasure) {
@@ -960,6 +1029,17 @@ const std::vector<float>& Steps::GetNpsPerMeasure(PlayerNumber pn) const {
   }
 }
 
+const std::vector<float>& Steps::GetNpsGraph(PlayerNumber pn) const {
+  static const std::vector<float> EMPTY_VECTOR;
+  if (Real()->m_NpsGraph.size() == 0) {
+    return EMPTY_VECTOR;
+  } else if (Real()->m_NpsGraph.size() <= pn) {
+    return Real()->m_NpsGraph[PLAYER_1];
+  } else {
+    return Real()->m_NpsGraph[pn];
+  }
+}
+
 const std::vector<int>& Steps::GetNotesPerMeasure(PlayerNumber pn) const {
   // m_NotesPerMeasure will only have separate sets of values per-player if
   // the steps type has different steps for each player (eg dance-couples,
@@ -1067,6 +1147,17 @@ class LunaSteps : public Luna<Steps> {
     }
     std::vector<float>& ts =
         const_cast<std::vector<float>&>(p->GetNpsPerMeasure(pn));
+    LuaHelpers::CreateTableFromArray(ts, L);
+    return 1;
+  }
+
+  static int GetNpsGraph(T* p, lua_State* L) {
+    PlayerNumber pn = PLAYER_1;
+    if (!lua_isnil(L, 1)) {
+      pn = Enum::Check<PlayerNumber>(L, 1);
+    }
+    std::vector<float>& ts =
+        const_cast<std::vector<float>&>(p->GetNpsGraph(pn));
     LuaHelpers::CreateTableFromArray(ts, L);
     return 1;
   }
@@ -1276,6 +1367,7 @@ class LunaSteps : public Luna<Steps> {
     // We expose them for testing purposes.
     ADD_METHOD(GetColumnCues);
     ADD_METHOD(GetNpsPerMeasure);
+    ADD_METHOD(GetNpsGraph);
     ADD_METHOD(GetNotesPerMeasure);
     ADD_METHOD(GetPeakNps);
     ADD_METHOD(GetGrooveStatsHash);

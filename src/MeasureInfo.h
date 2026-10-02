@@ -7,6 +7,9 @@
 #include "NoteData.h"
 #include "TimingData.h"
 
+// TODO: Handle non-4/4 time signatures.
+constexpr int BEATS_PER_MEASURE = 4;
+
 struct MeasureInfo {
   int measureCount;
   float peakNps;
