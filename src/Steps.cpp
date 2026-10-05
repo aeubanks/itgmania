@@ -993,13 +993,6 @@ const std::vector<NoteAnnotation>& Steps::GetNoteAnnotations(
 const std::vector<NoteAnnotationCache>& Steps::GetNoteAnnotationCaches() const {
   return m_NoteAnnotations;
 }
-std::vector<std::vector<NoteAnnotation>> Steps::GetAllNoteAnnotations() const {
-  std::vector<std::vector<NoteAnnotation>> annotations;
-  for (NoteAnnotationCache c : m_NoteAnnotations) {
-    annotations.push_back(c.GetNoteAnnotations());
-  }
-  return annotations;
-}
 
 float Steps::GetPeakNps(PlayerNumber pn) const {
   if (Real()->m_PeakNps.size() == 0) {

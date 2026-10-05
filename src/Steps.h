@@ -220,7 +220,6 @@ class Steps {
   void CalculateMeasureInfo(const NoteData& noteData);
   const std::vector<NoteAnnotation>& GetNoteAnnotations(PlayerNumber pn) const;
   const std::vector<NoteAnnotationCache>& GetNoteAnnotationCaches() const;
-  std::vector<std::vector<NoteAnnotation>> GetAllNoteAnnotations() const;
 
   const std::vector<std::vector<float>>& GetAllNpsPerMeasures() const {
     return Real()->m_NpsPerMeasure;

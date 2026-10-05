@@ -24,9 +24,6 @@ struct AutoMappingEntry {
         m_deviceButton(DeviceButton_Invalid),
         m_gb(GameButton_Invalid),
         m_bSecondController(false) {}
-  bool IsEmpty() const {
-    return m_deviceButton == DeviceButton_Invalid && m_gb == GameButton_Invalid;
-  }
 
   int m_iSlotIndex;
   DeviceButton m_deviceButton;
@@ -205,8 +202,6 @@ class InputMapper {
       const std::string& sub_reason);
   void SanityCheckMappings(std::vector<std::string>& reason);
 
-  void ClearAllMappings();
-
   void SetInputMap(
       const DeviceInput& DeviceI, const GameInput& GameI, int iSlotIndex);
   void ClearFromInputMap(const DeviceInput& DeviceI);
@@ -231,7 +226,6 @@ class InputMapper {
 
   float GetSecsHeld(
       const GameInput& GameI, MultiPlayer mp = MultiPlayer_Invalid) const;
-  float GetSecsHeld(GameButton MenuI, PlayerNumber pn) const;
 
   bool IsBeingPressed(
       const GameInput& GameI, MultiPlayer mp = MultiPlayer_Invalid,
