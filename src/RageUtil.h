@@ -3,14 +3,11 @@
 #ifndef RAGE_UTIL_H
 #define RAGE_UTIL_H
 
-#include <cmath>
 #include <cstdarg>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
 #include <ctime>
-#include <map>
-#include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -90,18 +87,12 @@ inline void wrap(int& x, int n) {
   x %= n;
 }
 inline void wrap(unsigned& x, unsigned n) { x %= n; }
-inline void wrap(float& x, float n) {
-  if (x < 0) {
-    x += std::trunc(((-x / n) + 1)) * n;
-  }
-  x = std::fmod(x, n);
-}
-
-inline float fracf(float f) { return f - std::trunc(f); }
+void wrap(float& x, float n);
 
 template <class T>
 void CircularShift(std::vector<T>& v, int dist) {
-  for (int i = std::abs(dist); i > 0; i--) {
+  int dist_abs = dist < 0 ? -dist : dist;
+  for (int i = dist_abs; i > 0; i--) {
     if (dist > 0) {
       T t = v[0];
       v.erase(v.begin());
@@ -171,14 +162,10 @@ inline int QuantizeUp(int i, int iInterval) {
   return int((i + iInterval - 1) / iInterval) * iInterval;
 }
 
-inline float QuantizeUp(float i, float iInterval) {
-  return std::ceil(i / iInterval) * iInterval;
-}
+float QuantizeUp(float i, float iInterval);
 
 /* Return i rounded down to the nearest multiple of iInterval. */
-inline float QuantizeDown(float i, float iInterval) {
-  return std::floor(i / iInterval) * iInterval;
-}
+float QuantizeDown(float i, float iInterval);
 
 // Move val toward other_val by to_move.
 void fapproach(float& val, float other_val, float to_move);
@@ -252,10 +239,8 @@ void MakeUpper(wchar_t* p, size_t iLen);
 float StringToFloat(const std::string& sString);
 bool StringToFloat(const std::string& sString, float& fOut);
 // Better than IntToString because you can check for success.
-template <class T>
-inline bool operator>>(const std::string& lhs, T& rhs) {
-  return !!(std::istringstream(lhs) >> rhs);
-}
+bool operator>>(const std::string& lhs, int& rhs);
+bool operator>>(const std::string& lhs, float& rhs);
 
 // Exception-safe wrappers around stoi and friends
 // Additional argument exceptVal will be returned if the conversion couldn't be
@@ -415,10 +400,8 @@ bool GetFileContents(
     const std::string& sPath, std::string& sOut, bool bOneLine = false);
 bool GetFileContents(const std::string& sFile, std::vector<std::string>& asOut);
 
-void ReplaceEntityText(
-    std::string& sText, const std::map<std::string, std::string>& m);
-void ReplaceEntityText(
-    std::string& sText, const std::map<char, std::string>& m);
+template <typename Map>
+void ReplaceEntityText(std::string& sText, const Map& m);
 void Replace_Unicode_Markers(std::string& Text);
 std::string WcharDisplayText(wchar_t c);
 

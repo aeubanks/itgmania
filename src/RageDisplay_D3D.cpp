@@ -3,6 +3,7 @@
 #include <d3d9.h>
 
 #include <algorithm>
+#include <map>
 #include <string>
 
 #include "DisplaySpec.h"

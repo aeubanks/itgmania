@@ -38,6 +38,8 @@ Preference<float> g_fLightsAheadSeconds("LightsAheadSeconds", 0.05f);
 static Preference<bool> g_bBlinkGameplayButtonLightsOnNote(
     "BlinkGameplayButtonLightsOnNote", false);
 
+static float fracf(float f) { return f - std::trunc(f); }
+
 static ThemeMetric<std::string> GAME_BUTTONS_TO_SHOW(
     "LightsManager", "GameButtonsToShow");
 

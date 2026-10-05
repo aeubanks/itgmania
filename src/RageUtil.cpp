@@ -43,6 +43,29 @@ const std::string CUSTOM_SONG_PATH = "/@mem/";
 
 void UnicodeUpperLower(wchar_t*, size_t, const unsigned char*);
 
+void wrap(float& x, float n) {
+  if (x < 0) {
+    x += std::trunc(((-x / n) + 1)) * n;
+  }
+  x = std::fmod(x, n);
+}
+
+float QuantizeUp(float i, float iInterval) {
+  return std::ceil(i / iInterval) * iInterval;
+}
+
+float QuantizeDown(float i, float iInterval) {
+  return std::floor(i / iInterval) * iInterval;
+}
+
+bool operator>>(const std::string& lhs, int& rhs) {
+  return !!(std::istringstream(lhs) >> rhs);
+}
+
+bool operator>>(const std::string& lhs, float& rhs) {
+  return !!(std::istringstream(lhs) >> rhs);
+}
+
 void fapproach(float& val, float other_val, float to_move) {
   ASSERT_M(to_move >= 0, ssprintf("to_move: %f < 0", to_move));
   if (val == other_val) {
@@ -1451,6 +1474,7 @@ std::string WcharToUTF8(wchar_t c) {
 }
 
 // &a; -> a
+template <>
 void ReplaceEntityText(
     std::string& sText, const std::map<std::string, std::string>& m) {
   std::string sRet;
@@ -1501,6 +1525,7 @@ void ReplaceEntityText(
 }
 
 // abcd -> &a; &b; &c; &d;
+template <>
 void ReplaceEntityText(
     std::string& sText, const std::map<char, std::string>& m) {
   std::string sFind;

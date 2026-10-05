@@ -16,6 +16,8 @@ using namespace X11Helper;
 
 #include <cmath>
 #include <cstdint>
+#include <map>
+#include <memory>
 #include <set>
 #include <string>
 #define GLX_GLXEXT_PROTOTYPES

@@ -4,6 +4,7 @@
 #define RAGE_MOVIE_TEXTURE_FFMPEG_H
 
 #include <atomic>
+#include <cmath>
 #include <condition_variable>
 #include <cstdint>
 #include <deque>

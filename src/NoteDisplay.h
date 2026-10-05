@@ -1,6 +1,7 @@
 #ifndef NOTE_DISPLAY_H
 #define NOTE_DISPLAY_H
 
+#include <map>
 #include <string>
 #include <vector>
 
