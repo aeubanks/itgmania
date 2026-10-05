@@ -40,6 +40,10 @@
 void sm_crash(const std::string& reason);
 [[noreturn]]
 void sm_crash(const char* reason = "Internal error");
+[[noreturn]]
+void FailWithMessage(const char* file, int line, const std::string& message);
+[[noreturn]]
+void FailWithMessage(const char* file, int line, const char* message);
 
 /**
  * @brief Assertion that sets an optional message and brings up the crash
@@ -48,11 +52,7 @@ void sm_crash(const char* reason = "Internal error");
  * This should probably be used instead of throwing an exception in most
  * cases we expect never to happen (but not in cases that we do expect,
  * such as DSound init failure.) */
-#define FAIL_M(MESSAGE)    \
-  do {                     \
-    CHECKPOINT_M(MESSAGE); \
-    sm_crash(MESSAGE);     \
-  } while (0)
+#define FAIL_M(MESSAGE) FailWithMessage(__FILE__, __LINE__, (MESSAGE))
 #define ASSERT_M(COND, MESSAGE) \
   do {                          \
     if (unlikely(!(COND))) {    \

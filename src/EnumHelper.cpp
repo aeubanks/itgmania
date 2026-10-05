@@ -115,6 +115,15 @@ const std::string& EnumToString(
   return pNameCache[iVal];
 }
 
+int StringToEnum(const std::string& s, int iMax, const char** szNameArray) {
+  for (int i = 0; i < iMax; ++i) {
+    if (!CompareNoCase(s, szNameArray[i])) {
+      return i;
+    }
+  }
+  return iMax + 1;
+}
+
 namespace {
 int GetName(lua_State* L) {
   luaL_checktype(L, 1, LUA_TTABLE);
@@ -151,7 +160,7 @@ static void PushEnumMethodTable(lua_State* L) {
 }
 
 /* Set up the enum table on the stack, and pop the table. */
-void Enum::SetMetatable(
+static void SetMetatable(
     lua_State* L, LuaReference& EnumTable, LuaReference& EnumIndexTable,
     const char* szName) {
   EnumTable.PushSelf(L);
@@ -172,6 +181,43 @@ void Enum::SetMetatable(
   }
   lua_setmetatable(L, -2);
   lua_pop(L, 2);
+}
+
+void Enum::InitLuaEnum(
+    lua_State* L, LuaReference& EnumToString, LuaReference& StringToEnum,
+    const char* szName, int iMax, std::string (*pfnToString)(int)) {
+  std::string sPrefix = std::string(szName) + "_";
+  /* Create the EnumToString table: { "UnlockEntry_ArcadePoints",
+   * "UnlockEntry_DancePoints" } */
+  lua_newtable(L);
+  for (int i = 0; i < iMax; ++i) {
+    std::string s = pfnToString(i);
+    lua_pushstring(L, (sPrefix + s).c_str());
+    lua_rawseti(L, -2, i + 1); /* 1-based */
+  }
+  EnumToString.SetFromStack(L);
+  EnumToString.PushSelf(L);
+  lua_setglobal(L, szName);
+  /* Create the StringToEnum table: { "UnlockEntry_ArcadePoints" = 0,
+   * "UnlockEntry_DancePoints" = 1 } */
+  lua_newtable(L);
+  for (int i = 0; i < iMax; ++i) {
+    std::string s = pfnToString(i);
+    lua_pushstring(L, (sPrefix + s).c_str());
+    lua_pushnumber(L, i); /* 0-based */
+    lua_rawset(L, -3);
+    /* Compatibility with old, case-insensitive values */
+    MakeLower(s);
+    lua_pushstring(L, s.c_str());
+    lua_pushnumber(L, i); /* 0-based */
+    lua_rawset(L, -3);
+    /* Compatibility with old, raw values */
+    lua_pushnumber(L, i);
+    lua_rawseti(L, -2, i);
+  }
+  StringToEnum.SetFromStack(L);
+  StringToEnum.PushSelf(L);
+  SetMetatable(L, EnumToString, StringToEnum, szName);
 }
 
 /*

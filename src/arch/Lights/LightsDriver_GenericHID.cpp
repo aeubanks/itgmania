@@ -8,6 +8,7 @@
 #include "LightsDriver.h"
 #include "Preference.h"
 #include "RageLog.h"
+#include "StdString.h"
 #include "global.h"
 
 REGISTER_LIGHTS_DRIVER_CLASS(GenericHID);

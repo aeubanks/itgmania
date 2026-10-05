@@ -27,6 +27,15 @@ using CrashHandler::IsDebuggerPresent;
 
 void sm_crash(const std::string& s) { sm_crash(s.c_str()); }
 
+void FailWithMessage(const char* file, int line, const std::string& message) {
+  FailWithMessage(file, line, message.c_str());
+}
+
+void FailWithMessage(const char* file, int line, const char* message) {
+  Checkpoints::SetCheckpoint(file, line, message);
+  sm_crash(message);
+}
+
 void sm_crash(const char* reason) {
 #if defined(_WIN32) || defined(MACOSX) || defined(_XDBG)
   /* If we're being debugged, throw a debug break so it'll suspend the process.
