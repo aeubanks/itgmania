@@ -484,6 +484,11 @@ struct SongIsEqual {
 };
 }  // namespace
 
+static void GetTrailUnsortedEndless(
+    const std::vector<CourseEntry>& entries, Trail& trail, StepsType& st,
+    CourseDifficulty& cd, RandomGen& rnd,
+    bool& bCourseDifficultyIsSignificant, bool bIsAnEdit);
+
 bool Course::GetTrailUnsorted(
     StepsType st, CourseDifficulty cd, Trail& trail) const {
   trail.Init();
@@ -529,7 +534,8 @@ bool Course::GetTrailUnsorted(
   // Resolve each entry to a Song and Steps.
   if (trail.m_CourseType == COURSE_TYPE_ENDLESS) {
     GetTrailUnsortedEndless(
-        entries, trail, st, cd, rnd, bCourseDifficultyIsSignificant);
+        entries, trail, st, cd, rnd, bCourseDifficultyIsSignificant,
+        IsAnEdit());
   } else {
     std::vector<SongAndSteps> vSongAndSteps;
     for (auto e = entries.begin(); e != entries.end(); ++e) {
@@ -725,10 +731,10 @@ bool Course::GetTrailUnsorted(
   return bCourseDifficultyIsSignificant && trail.m_vEntries.size() > 0;
 }
 
-void Course::GetTrailUnsortedEndless(
+static void GetTrailUnsortedEndless(
     const std::vector<CourseEntry>& entries, Trail& trail, StepsType& st,
     CourseDifficulty& cd, RandomGen& rnd,
-    bool& bCourseDifficultyIsSignificant) const {
+    bool& bCourseDifficultyIsSignificant, bool bIsAnEdit) {
   typedef std::vector<Steps*> StepsVector;
 
   std::set<Song*> alreadySelected;
@@ -927,7 +933,7 @@ void Course::GetTrailUnsortedEndless(
     // LOG->Trace( "Chose: %s, %d", te.pSong->GetSongDir().c_str(),
     // te.pSteps->GetMeter() );
 
-    if (IsAnEdit() && MAX_SONGS_IN_EDIT_COURSE > 0 &&
+    if (bIsAnEdit && MAX_SONGS_IN_EDIT_COURSE > 0 &&
         int(trail.m_vEntries.size()) >= MAX_SONGS_IN_EDIT_COURSE) {
       break;
     }

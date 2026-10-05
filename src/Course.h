@@ -13,7 +13,6 @@
 #include "GameConstantsAndTypes.h"
 #include "RadarValues.h"
 #include "RageTypes.h"
-#include "RageUtil/RandomNumbers.h"
 #include "SongUtil.h"
 #include "StepsUtil.h"
 #include "Trail.h"
@@ -180,10 +179,6 @@ class Course {
   void CalculateRadarValues();
 
   bool GetTrailUnsorted(StepsType st, CourseDifficulty cd, Trail& trail) const;
-  void GetTrailUnsortedEndless(
-      const std::vector<CourseEntry>& entries, Trail& trail, StepsType& st,
-      CourseDifficulty& cd, RandomGen& rnd,
-      bool& bCourseDifficultyIsSignificant) const;
   bool GetTrailSorted(StepsType st, CourseDifficulty cd, Trail& trail) const;
 
   bool IsAnEdit() const { return m_LoadedFromProfile != ProfileSlot_Invalid; }

@@ -1,13 +1,26 @@
 
 #include "RandomNumbers.h"
 
-#include <cmath>
+#include <ctime>
 #include <random>
 
 #include "LuaBinding.h"
 #include "LuaManager.h"
 
+MersenneTwister::MersenneTwister(int iSeed)
+    : std::mt19937(iSeed == 0 ? time(nullptr) : iSeed) {}
+
 RandomGen g_RandomNumberGenerator;
+
+float RandomFloat(float fLow, float fHigh) {
+  std::uniform_real_distribution<> dist(fLow, fHigh);
+  return dist(g_RandomNumberGenerator);
+}
+
+int RandomInt(int nLow, int nHigh) {
+  std::uniform_int_distribution<> dist(nLow, nHigh);
+  return dist(g_RandomNumberGenerator);
+}
 
 /* Extend MersenneTwister into Lua space. This is intended to replace
  * math.randomseed and math.random, so we conform to their behavior. */

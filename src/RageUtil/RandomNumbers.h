@@ -1,13 +1,11 @@
 #ifndef RAGEUTIL_RANDOMNUMBERS_H
 #define RAGEUTIL_RANDOMNUMBERS_H
 
-#include <ctime>
 #include <random>
 
 class MersenneTwister : public std::mt19937 {
  public:
-  MersenneTwister(int iSeed = 0)
-      : std::mt19937(iSeed == 0 ? time(nullptr) : iSeed) {}
+  MersenneTwister(int iSeed = 0);
 };
 
 typedef MersenneTwister RandomGen;
@@ -20,16 +18,10 @@ extern RandomGen g_RandomNumberGenerator;
  * @param fHigh the high value, inclusive.
  * @return the random float.
  */
-inline float RandomFloat(float fLow, float fHigh) {
-  std::uniform_real_distribution<> dist(fLow, fHigh);
-  return dist(g_RandomNumberGenerator);
-}
+float RandomFloat(float fLow, float fHigh);
 
 // Returns an integer between nLow and nHigh inclusive
-inline int RandomInt(int nLow, int nHigh) {
-  std::uniform_int_distribution<> dist(nLow, nHigh);
-  return dist(g_RandomNumberGenerator);
-}
+int RandomInt(int nLow, int nHigh);
 
 // Returns an integer between 0 and n-1 inclusive (replacement for rand() % n).
 inline int RandomInt(int n) { return RandomInt(0, n - 1); }
