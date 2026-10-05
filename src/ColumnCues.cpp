@@ -47,10 +47,11 @@ void CalculateColumnCuesOnePlayer(
 
   float previousCueTime = 0;
   out.clear();
-  for (ColumnCue columnCue : allColumnCues) {
+  for (ColumnCue& columnCue : allColumnCues) {
     float duration = columnCue.startTime - previousCueTime;
     if (duration > minDuration || previousCueTime == 0) {
-      out.emplace_back(previousCueTime, duration, columnCue.columns);
+      out.emplace_back(
+          previousCueTime, duration, std::move(columnCue.columns));
     }
     previousCueTime = columnCue.startTime;
   }

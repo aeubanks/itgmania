@@ -847,6 +847,12 @@ void Sprite::RecalcAnimationLengthSeconds() {
   }
 }
 
+void Sprite::SetStateProperties(const std::vector<State>& new_states) {
+  m_States = new_states;
+  RecalcAnimationLengthSeconds();
+  SetState(0);
+}
+
 void Sprite::SetSecondsIntoAnimation(float fSeconds) {
   SetState(0);  // rewind to the first state
   if (m_pTexture) {

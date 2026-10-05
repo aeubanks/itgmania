@@ -40,7 +40,12 @@ class NoteData {
   typedef TrackMap::iterator iterator;
   typedef TrackMap::const_iterator const_iterator;
 
-  NoteData() : m_TapNotes() {}
+  NoteData();
+  NoteData(const NoteData& other);
+  NoteData(NoteData&& other) noexcept;
+  NoteData& operator=(const NoteData& other);
+  NoteData& operator=(NoteData&& other) noexcept;
+  ~NoteData();
 
   iterator begin(int iTrack) { return m_TapNotes[iTrack].begin(); }
   const_iterator begin(int iTrack) const { return m_TapNotes[iTrack].begin(); }
@@ -50,11 +55,7 @@ class NoteData {
   const_iterator lower_bound(int iTrack, int iRow) const;
   iterator upper_bound(int iTrack, int iRow);
   const_iterator upper_bound(int iTrack, int iRow) const;
-  void swap(NoteData& nd) {
-    m_TapNotes.swap(nd.m_TapNotes);
-    m_atis.swap(nd.m_atis);
-    m_const_atis.swap(nd.m_const_atis);
-  }
+  void swap(NoteData& nd);
 
   // This is ugly to make it templated but I don't want to have to write the
   // same class twice.

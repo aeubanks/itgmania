@@ -23,6 +23,19 @@
 
 REGISTER_CLASS_TRAITS(NoteData, new NoteData(*pCopy))
 
+NoteData::NoteData() = default;
+NoteData::NoteData(const NoteData& other) = default;
+NoteData::NoteData(NoteData&& other) noexcept = default;
+NoteData& NoteData::operator=(const NoteData& other) = default;
+NoteData& NoteData::operator=(NoteData&& other) noexcept = default;
+NoteData::~NoteData() = default;
+
+void NoteData::swap(NoteData& nd) {
+  m_TapNotes.swap(nd.m_TapNotes);
+  m_atis.swap(nd.m_atis);
+  m_const_atis.swap(nd.m_const_atis);
+}
+
 void NoteData::Init() {
   m_TapNotes = std::vector<TrackMap>();  // ensure that the memory is freed
 }
