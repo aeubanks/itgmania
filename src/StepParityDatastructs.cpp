@@ -31,6 +31,28 @@ float facing_penalty(float v) {
   return result;
 }
 
+StageLayout::StageLayout(
+    StepsType t, const std::vector<StagePoint>& c, const std::vector<int>& u,
+    const std::vector<int>& d, const std::vector<int>& s)
+    : type(t), upArrows(u), downArrows(d), sideArrows(s) {
+  this->columnCount = static_cast<int>(c.size());
+  for (int i = 0; i < this->columnCount; i++) {
+    this->columns[i] = c[i];
+  }
+  this->preCalculateStuff();
+  this->preGeneratePermutations();
+}
+
+RowCounter::RowCounter(int columnCount)
+    : notes(columnCount),
+      activeHolds(columnCount),
+      lastColumnSecond(CLM_SECOND_INVALID),
+      lastColumnBeat(CLM_SECOND_INVALID),
+      mines(columnCount, 0),
+      fakeMines(columnCount, 0),
+      nextMines(columnCount, 0),
+      nextFakeMines(columnCount, 0) {}
+
 void StageLayout::preCalculateStuff() {
   for (int left = 0; left < columnCount; left++) {
     for (int right = 0; right < columnCount; right++) {
@@ -42,8 +64,8 @@ void StageLayout::preCalculateStuff() {
       };
       avgPoints[idx] = avgPoint;
 
-      float dx = columns[left].x - columns[right].x;
-      float dy = columns[left].y - columns[right].y;
+      float dx = columns[right].x - columns[left].x;
+      float dy = columns[right].y - columns[left].y;
       float distSq = (dx * dx) + (dy * dy);
       float dist = sqrt(distSq);
       distances[idx] = dist;
@@ -54,8 +76,14 @@ void StageLayout::preCalculateStuff() {
       } else {
         float normalized_dx = dx / dist;
         float normalized_dy = dy / dist;
-        float xm = getXDifference(left, right);
-        float ym = getYDifference(left, right);
+        float xm = std::pow(normalized_dx, 4);
+        if (normalized_dx <= 0) {
+          xm = -xm;
+        }
+        float ym = std::pow(normalized_dy, 4);
+        if (normalized_dy <= 0) {
+          ym = -ym;
+        }
 
         facingXPenalties[idx] = std::max(0.0f, facing_penalty(xm));
         facingYPenalties[idx] = std::max(0.0f, facing_penalty(ym));
@@ -89,9 +117,9 @@ void StageLayout::preGeneratePermutations() {
   // Set an empty array for a bitmask of 0x0, this is used
   // by StepParityGenerator::getFootPlacementPermutations
   // to return an empty array
-  permuteCache[0] = {};
+  permuteCache.assign(1u << columnCount, {});
 
-  for (unsigned int i = 0; i < pow(2, columnCount); i++) {
+  for (unsigned int i = 0; i < (1u << columnCount); i++) {
     int bits = popcount(i);
     if (bits > 4) {
       continue;

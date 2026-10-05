@@ -246,23 +246,20 @@ const std::vector<FootPlacement>*
 StepParityGenerator::getFootPlacementPermutations(const Row& row) {
   int cacheKey = row.note_mask | row.hold_mask;
 
-  auto maybePermuteFootPlacements = layout->permuteCache.find(cacheKey);
+  if (!layout->permuteCache[cacheKey].empty()) {
+    return &layout->permuteCache[cacheKey];
+  }
 
   // If no valid foot placements were found for (note_mask | hold_mask), then
   // check if there is a valid placement for just note_mask
   // (basically, assume that the player has to drop the holds)
-  if (maybePermuteFootPlacements == layout->permuteCache.end()) {
-    maybePermuteFootPlacements = layout->permuteCache.find(row.note_mask);
+  if (!layout->permuteCache[row.note_mask].empty()) {
+    return &layout->permuteCache[row.note_mask];
   }
 
   // And if there still aren't any valid placements, return
   // permuteCache[0], which will be an empty array.
-  if (maybePermuteFootPlacements == layout->permuteCache.end()) {
-    return &(layout->permuteCache.at(0));
-  } else {
-    auto& value = maybePermuteFootPlacements->second;
-    return &value;
-  }
+  return &layout->permuteCache[0];
 }
 
 std::vector<int> StepParityGenerator::computeCheapestPath() {

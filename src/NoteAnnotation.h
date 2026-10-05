@@ -1,10 +1,10 @@
 #ifndef NOTE_ANNOTATION_H
 #define NOTE_ANNOTATION_H
 
+#include <cstdint>
 #include <string>
 #include <vector>
 
-#include "StepParityDatastructs.h"
 #include "TechCountsCategory.h"
 
 struct NoteAnnotation {

@@ -1,12 +1,8 @@
 #ifndef STEP_PARITY_DATASTRUCTS_H
 #define STEP_PARITY_DATASTRUCTS_H
 
-#include <algorithm>
 #include <array>
-#include <cmath>
 #include <cstdint>
-#include <string>
-#include <unordered_map>
 #include <vector>
 
 #include "GameConstantsAndTypes.h"
@@ -33,7 +29,7 @@ enum Foot {
 /// foot placement on the dance stage.
 typedef std::vector<Foot> FootPlacement;
 
-const std::vector<uint16_t> FOOT_MASKS = {0, 1, 2, 4, 8};
+const std::array<uint16_t, 5> FOOT_MASKS = {0, 1, 2, 4, 8};
 
 const std::array<StepParity::Foot, 4> FEET = {
     Foot_LeftHeel, Foot_LeftToe, Foot_RightHeel, Foot_RightToe};
@@ -65,19 +61,11 @@ struct StageLayout {
   std::array<float, MAX_TABLE> distances = {};
   std::array<float, MAX_TABLE> facingXPenalties = {};
   std::array<float, MAX_TABLE> facingYPenalties = {};
-  std::unordered_map<int, std::vector<FootPlacement>> permuteCache;
+  std::vector<std::vector<FootPlacement>> permuteCache;
 
   StageLayout(
       StepsType t, const std::vector<StagePoint>& c, const std::vector<int>& u,
-      const std::vector<int>& d, const std::vector<int>& s)
-      : type(t), upArrows(u), downArrows(d), sideArrows(s) {
-    this->columnCount = static_cast<int>(c.size());
-    for (int i = 0; i < this->columnCount; i++) {
-      this->columns[i] = c[i];
-    }
-    this->preCalculateStuff();
-    this->preGeneratePermutations();
-  }
+      const std::vector<int>& d, const std::vector<int>& s);
 
   // These are small geometry accessors called from the per-(node *
   // permutation * row) cost loop, so they're defined inline here to let the
@@ -109,30 +97,6 @@ struct StageLayout {
       return 0;
     }
     return facingYPenalties[leftIndex * columnCount + rightIndex];
-  }
-  float getXDifference(int leftIndex, int rightIndex) const {
-    if (leftIndex == rightIndex) {
-      return 0;
-    }
-    float dx = columns[rightIndex].x - columns[leftIndex].x;
-    float dy = columns[rightIndex].y - columns[leftIndex].y;
-    float distance = std::sqrt(dx * dx + dy * dy);
-    dx /= distance;
-    bool negative = dx <= 0;
-    dx = std::pow(dx, 4);
-    return negative ? -dx : dx;
-  }
-  float getYDifference(int leftIndex, int rightIndex) const {
-    if (leftIndex == rightIndex) {
-      return 0;
-    }
-    float dx = columns[rightIndex].x - columns[leftIndex].x;
-    float dy = columns[rightIndex].y - columns[leftIndex].y;
-    float distance = std::sqrt(dx * dx + dy * dy);
-    dy /= distance;
-    bool negative = dy <= 0;
-    dy = std::pow(dy, 4);
-    return negative ? -dy : dy;
   }
   StagePoint averagePoint(int leftIndex, int rightIndex) const {
     if (leftIndex == INVALID_COLUMN && rightIndex == INVALID_COLUMN) {
@@ -253,17 +217,7 @@ struct RowCounter {
   std::vector<float> nextFakeMines;
   // number of "notes" added to the counter for the current row.
   int noteCount = 0;
-  RowCounter(int columnCount) {
-    notes = std::vector<IntermediateNoteData>(columnCount);
-    activeHolds = std::vector<IntermediateNoteData>(columnCount);
-    mines = std::vector<float>(columnCount, 0);
-    fakeMines = std::vector<float>(columnCount, 0);
-    nextMines = std::vector<float>(columnCount, 0);
-    nextFakeMines = std::vector<float>(columnCount, 0);
-
-    lastColumnSecond = CLM_SECOND_INVALID;
-    lastColumnBeat = CLM_SECOND_INVALID;
-  }
+  RowCounter(int columnCount);
 };
 
 /// @brief A node within a StepParityGraph.

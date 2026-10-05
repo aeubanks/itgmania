@@ -2,8 +2,8 @@
 
 #include <cstdint>
 #include <cstring>
-#include <sstream>
 
+#include "RageLog.h"
 #include "mbedtls/base64.h"
 
 int base64_encode(const std::vector<uint8_t>& input, std::string& output) {
