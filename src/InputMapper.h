@@ -1,6 +1,7 @@
 #ifndef INPUT_MAPPER_H
 #define INPUT_MAPPER_H
 
+#include <initializer_list>
 #include <string>
 #include <vector>
 
@@ -19,11 +20,6 @@ extern const std::string DEVICE_INPUT_SEPARATOR;
 struct AutoMappingEntry {
   AutoMappingEntry(int i, DeviceButton db, GameButton gb, bool b)
       : m_iSlotIndex(i), m_deviceButton(db), m_gb(gb), m_bSecondController(b) {}
-  AutoMappingEntry()
-      : m_iSlotIndex(-1),
-        m_deviceButton(DeviceButton_Invalid),
-        m_gb(GameButton_Invalid),
-        m_bSecondController(false) {}
 
   int m_iSlotIndex;
   DeviceButton m_deviceButton;
@@ -40,91 +36,12 @@ struct AutoMappingEntry {
 struct AutoMappings {
   AutoMappings(
       std::string s1, std::string s2, std::string s3,
-      AutoMappingEntry im0 = AutoMappingEntry(),
-      AutoMappingEntry im1 = AutoMappingEntry(),
-      AutoMappingEntry im2 = AutoMappingEntry(),
-      AutoMappingEntry im3 = AutoMappingEntry(),
-      AutoMappingEntry im4 = AutoMappingEntry(),
-      AutoMappingEntry im5 = AutoMappingEntry(),
-      AutoMappingEntry im6 = AutoMappingEntry(),
-      AutoMappingEntry im7 = AutoMappingEntry(),
-      AutoMappingEntry im8 = AutoMappingEntry(),
-      AutoMappingEntry im9 = AutoMappingEntry(),
-      AutoMappingEntry im10 = AutoMappingEntry(),
-      AutoMappingEntry im11 = AutoMappingEntry(),
-      AutoMappingEntry im12 = AutoMappingEntry(),
-      AutoMappingEntry im13 = AutoMappingEntry(),
-      AutoMappingEntry im14 = AutoMappingEntry(),
-      AutoMappingEntry im15 = AutoMappingEntry(),
-      AutoMappingEntry im16 = AutoMappingEntry(),
-      AutoMappingEntry im17 = AutoMappingEntry(),
-      AutoMappingEntry im18 = AutoMappingEntry(),
-      AutoMappingEntry im19 = AutoMappingEntry(),
-      AutoMappingEntry im20 = AutoMappingEntry(),
-      AutoMappingEntry im21 = AutoMappingEntry(),
-      AutoMappingEntry im22 = AutoMappingEntry(),
-      AutoMappingEntry im23 = AutoMappingEntry(),
-      AutoMappingEntry im24 = AutoMappingEntry(),
-      AutoMappingEntry im25 = AutoMappingEntry(),
-      AutoMappingEntry im26 = AutoMappingEntry(),
-      AutoMappingEntry im27 = AutoMappingEntry(),
-      AutoMappingEntry im28 = AutoMappingEntry(),
-      AutoMappingEntry im29 = AutoMappingEntry(),
-      AutoMappingEntry im30 = AutoMappingEntry(),
-      AutoMappingEntry im31 = AutoMappingEntry(),
-      AutoMappingEntry im32 = AutoMappingEntry(),
-      AutoMappingEntry im33 = AutoMappingEntry(),
-      AutoMappingEntry im34 = AutoMappingEntry(),
-      AutoMappingEntry im35 = AutoMappingEntry(),
-      AutoMappingEntry im36 = AutoMappingEntry(),
-      AutoMappingEntry im37 = AutoMappingEntry(),
-      AutoMappingEntry im38 = AutoMappingEntry(),
-      AutoMappingEntry im39 = AutoMappingEntry())
-      : m_sGame(s1), m_sDriverRegex(s2), m_sControllerName(s3), m_vMaps() {
-#define PUSH(im) \
-  if (!im.IsEmpty()) m_vMaps.push_back(im);
-    PUSH(im0);
-    PUSH(im1);
-    PUSH(im2);
-    PUSH(im3);
-    PUSH(im4);
-    PUSH(im5);
-    PUSH(im6);
-    PUSH(im7);
-    PUSH(im8);
-    PUSH(im9);
-    PUSH(im10);
-    PUSH(im11);
-    PUSH(im12);
-    PUSH(im13);
-    PUSH(im14);
-    PUSH(im15);
-    PUSH(im16);
-    PUSH(im17);
-    PUSH(im18);
-    PUSH(im19);
-    PUSH(im20);
-    PUSH(im21);
-    PUSH(im22);
-    PUSH(im23);
-    PUSH(im24);
-    PUSH(im25);
-    PUSH(im26);
-    PUSH(im27);
-    PUSH(im28);
-    PUSH(im29);
-    PUSH(im30);
-    PUSH(im31);
-    PUSH(im32);
-    PUSH(im33);
-    PUSH(im34);
-    PUSH(im35);
-    PUSH(im36);
-    PUSH(im37);
-    PUSH(im38);
-    PUSH(im39);
-#undef PUSH
-  }
+      std::initializer_list<AutoMappingEntry> maps_list = {});
+
+  template <typename... Entries>
+  AutoMappings(
+      const char* s1, const char* s2, const char* s3, const Entries&... im)
+      : AutoMappings(s1, s2, s3, {im...}) {}
 
   // Strings used by automatic joystick mappings.
   std::string m_sGame;            // only used

@@ -1,5 +1,6 @@
 #include "ScreenMiniMenu.h"
 
+#include <initializer_list>
 #include <string>
 #include <vector>
 
@@ -12,6 +13,73 @@
 #include "ScreenMessage.h"
 #include "ScreenOptions.h"
 #include "global.h"
+
+MenuRowDef::MenuRowDef(const MenuRowDef&) = default;
+MenuRowDef::MenuRowDef(MenuRowDef&&) noexcept = default;
+MenuRowDef& MenuRowDef::operator=(const MenuRowDef&) = default;
+MenuRowDef& MenuRowDef::operator=(MenuRowDef&&) noexcept = default;
+MenuRowDef::~MenuRowDef() = default;
+
+MenuRowDef::MenuRowDef(
+    int r, const char* n, bool e, MenuRowUpdateEnabled pe, EditMode s,
+    bool bTT, bool bTI, int d,
+    std::initializer_list<const char*> choices_list)
+    : iRowCode(r),
+      sName(n),
+      bEnabled(e),
+      pfnEnabled(pe),
+      emShowIn(s),
+      iDefaultChoice(d),
+      choices(),
+      bThemeTitle(bTT),
+      bThemeItems(bTI) {
+  for (const char* c : choices_list) {
+    if (c) {
+      choices.emplace_back(c);
+    }
+  }
+}
+
+MenuRowDef::MenuRowDef(
+    int r, const std::string& n, bool e, EditMode s, bool bTT, bool bTI, int d,
+    const std::vector<std::string>& options)
+    : iRowCode(r),
+      sName(n),
+      bEnabled(e),
+      pfnEnabled(nullptr),
+      emShowIn(s),
+      iDefaultChoice(d),
+      choices(),
+      bThemeTitle(bTT),
+      bThemeItems(bTI) {
+  for (const std::string& str : options) {
+    if (!str.empty()) {
+      choices.push_back(str);
+    }
+  }
+}
+
+bool MenuRowDef::SetDefaultChoiceIfPresent(std::string sChoice) {
+  iDefaultChoice = 0;
+  for (unsigned i = 0; i < choices.size(); ++i) {
+    if (choices[i] == sChoice) {
+      iDefaultChoice = i;
+      return true;
+    }
+  }
+  return false;
+}
+
+MenuDef::MenuDef(
+    const char* c, std::initializer_list<const MenuRowDef*> rows_list)
+    : sClassName(c), rows() {
+  rows.reserve(rows_list.size());
+  for (const MenuRowDef* r : rows_list) {
+    rows.push_back(*r);
+  }
+}
+
+MenuDef::~MenuDef() = default;
 
 bool ScreenMiniMenu::s_bCancelled = false;
 int ScreenMiniMenu::s_iLastRowCode = -1;

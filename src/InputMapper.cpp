@@ -54,6 +54,14 @@ InputMapper::~InputMapper() {
   g_tempDItoGI.clear();
 }
 
+AutoMappings::AutoMappings(
+    std::string s1, std::string s2, std::string s3,
+    std::initializer_list<AutoMappingEntry> maps_list)
+    : m_sGame(std::move(s1)),
+      m_sDriverRegex(std::move(s2)),
+      m_sControllerName(std::move(s3)),
+      m_vMaps(maps_list) {}
+
 static const AutoMappings g_DefaultKeyMappings = AutoMappings(
     "", "", "", AutoMappingEntry(0, KEY_LEFT, GAME_BUTTON_MENULEFT, false),
     AutoMappingEntry(0, KEY_RIGHT, GAME_BUTTON_MENURIGHT, false),
