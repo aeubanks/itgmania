@@ -15,10 +15,43 @@
 
 /** @brief The general interface for reading ThemeMetrics. */
 class IThemeMetric {
+ protected:
+  /** @brief the metric's group.
+   *
+   * In metrics.ini, it is usually done as such: [GroupName] */
+  std::string m_sGroup;
+  /** @brief the metric's name. */
+  std::string m_sName;
+  /** @brief the metric's value. */
+  LuaReference m_Value;
+  bool m_bCallEachTime;
+
+  IThemeMetric(
+      const std::string& sGroup = "", const std::string& sName = "");
+  IThemeMetric(const IThemeMetric& cpy);
+
+  Lua* BeginRead(bool bCallable);
+  Lua* BeginCallEachTime() const;
+  void EndRead(Lua* L) const;
+
  public:
-  virtual ~IThemeMetric() {}
+  virtual ~IThemeMetric();
   virtual void Read() = 0;
-  virtual void Clear() = 0;
+  void Clear();
+
+  /**
+   * @brief Load the chosen metric from the .ini file.
+   * @param sGroup the group the metric is in.
+   * @param sName the name of the metric. */
+  void Load(const std::string& sGroup, const std::string& sName);
+  void PushSelf(Lua* L);
+
+  /**
+   * @brief Retrieve the metric's name.
+   * @return the metric's name. */
+  const std::string& GetName() const { return m_sName; }
+
+  bool IsLoaded() const { return m_Value.IsSet(); }
 };
 
 template <class T>
@@ -43,16 +76,7 @@ struct ThemeMetricTypeTraits<apActorCommands> {
 template <class T>
 class ThemeMetric : public IThemeMetric {
  protected:
-  /** @brief the metric's group.
-   *
-   * In metrics.ini, it is usually done as such: [GroupName] */
-  std::string m_sGroup;
-  /** @brief the metric's name. */
-  std::string m_sName;
-  /** @brief the metric's value. */
-  LuaReference m_Value;
   mutable T m_currentValue;
-  bool m_bCallEachTime;
 
  public:
   /* Initializing with no group and name is allowed; if you do this, you must
@@ -60,94 +84,40 @@ class ThemeMetric : public IThemeMetric {
    * in one place for classes that don't receive their m_sName in the
    * constructor (everything except screens). */
   ThemeMetric(const std::string& sGroup = "", const std::string& sName = "")
-      : m_sGroup(sGroup),
-        m_sName(sName),
-        m_Value(),
-        m_currentValue(T()),
-        m_bCallEachTime(false) {
+      : IThemeMetric(sGroup, sName), m_currentValue(T()) {
     ThemeManager::Subscribe(this);
   }
 
   ThemeMetric(const ThemeMetric<T>& cpy)
-      : IThemeMetric(cpy),
-        m_sGroup(cpy.m_sGroup),
-        m_sName(cpy.m_sName),
-        m_Value(cpy.m_Value)
-  // do we transfer the current value or bCallEachTime?
-  {
+      : IThemeMetric(cpy), m_currentValue(cpy.m_currentValue) {
     ThemeManager::Subscribe(this);
   }
 
-  ~ThemeMetric() { ThemeManager::Unsubscribe(this); }
-  /**
-   * @brief Load the chosen metric from the .ini file.
-   * @param sGroup the group the metric is in.
-   * @param sName the name of the metric. */
-  void Load(const std::string& sGroup, const std::string& sName) {
-    m_sGroup = sGroup;
-    m_sName = sName;
-    Read();
-  }
+  ~ThemeMetric() override = default;
+
   /**
    * @brief Actually read the metric and get its data. */
-  void Read() {
-    if (m_sName != "" && THEME && THEME->IsThemeLoaded()) {
-      Lua* L = LUA->Get();
-      THEME->GetMetric(m_sGroup, m_sName, m_Value);
-      m_Value.PushSelf(L);
+  void Read() override {
+    if (Lua* L = BeginRead(ThemeMetricTypeTraits<T>::Callable)) {
       LuaHelpers::FromStack(L, m_currentValue, -1);
-      lua_pop(L, 1);
-      LUA->Release(L);
-
-      /* If the value is a function, evaluate it every time. */
-      m_bCallEachTime = ThemeMetricTypeTraits<T>::Callable &&
-                        m_Value.GetLuaType() == LUA_TFUNCTION;
-    } else {
-      m_Value.Unset();
-      m_bCallEachTime = false;
+      EndRead(L);
     }
   }
-
-  void PushSelf(Lua* L) {
-    ASSERT(m_Value.IsSet());
-    m_Value.PushSelf(L);
-  }
-
-  void Clear() { m_Value.Unset(); }
-
-  /**
-   * @brief Retrieve the metric's name.
-   * @return the metric's name. */
-  const std::string& GetName() const { return m_sName; }
 
   /**
    * @brief Retrieve the metric's value.
    * @return the metric's value. */
   const T& GetValue() const {
-    ASSERT(m_sName != "");
-    ASSERT_M(m_Value.IsSet(), m_sGroup + " " + m_sName);
-
-    if (m_bCallEachTime) {
-      Lua* L = LUA->Get();
-
-      // call function with 0 arguments and 1 result
-      m_Value.PushSelf(L);
-      std::string error = m_sGroup + ": " + m_sName + ": ";
-      LuaHelpers::RunScriptOnStack(L, error, 0, 1, true);
-      if (!lua_isnil(L, -1)) {
-        LuaHelpers::Pop(L, m_currentValue);
-      } else {
-        lua_pop(L, 1);
+    if (unlikely(!m_Value.IsSet() || m_bCallEachTime)) {
+      if (Lua* L = BeginCallEachTime()) {
+        LuaHelpers::FromStack(L, m_currentValue, -1);
+        EndRead(L);
       }
-      LUA->Release(L);
     }
-
     return m_currentValue;
   }
 
   operator const T&() const { return GetValue(); }
-
-  bool IsLoaded() const { return m_Value.IsSet(); }
 
   // Hacks for VC6 for all boolean operators.
   // These three no longer appear to be required:

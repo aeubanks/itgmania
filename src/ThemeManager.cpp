@@ -117,6 +117,73 @@ void ThemeManager::Unsubscribe(IThemeMetric* p) {
   g_Subscribers.Unsubscribe(p);
 }
 
+IThemeMetric::IThemeMetric(
+    const std::string& sGroup, const std::string& sName)
+    : m_sGroup(sGroup), m_sName(sName), m_Value(), m_bCallEachTime(false) {}
+
+IThemeMetric::IThemeMetric(const IThemeMetric& cpy)
+    : m_sGroup(cpy.m_sGroup),
+      m_sName(cpy.m_sName),
+      m_Value(cpy.m_Value),
+      m_bCallEachTime(cpy.m_bCallEachTime) {}
+
+IThemeMetric::~IThemeMetric() { ThemeManager::Unsubscribe(this); }
+
+void IThemeMetric::Load(
+    const std::string& sGroup, const std::string& sName) {
+  m_sGroup = sGroup;
+  m_sName = sName;
+  Read();
+}
+
+Lua* IThemeMetric::BeginRead(bool bCallable) {
+  if (m_sName != "" && THEME && THEME->IsThemeLoaded()) {
+    Lua* L = LUA->Get();
+    THEME->GetMetric(m_sGroup, m_sName, m_Value);
+    m_Value.PushSelf(L);
+
+    /* If the value is a function, evaluate it every time. */
+    m_bCallEachTime = bCallable && m_Value.GetLuaType() == LUA_TFUNCTION;
+    return L;
+  } else {
+    m_Value.Unset();
+    m_bCallEachTime = false;
+    return nullptr;
+  }
+}
+
+Lua* IThemeMetric::BeginCallEachTime() const {
+  ASSERT(m_sName != "");
+  ASSERT_M(m_Value.IsSet(), m_sGroup + " " + m_sName);
+
+  if (m_bCallEachTime) {
+    Lua* L = LUA->Get();
+
+    // call function with 0 arguments and 1 result
+    m_Value.PushSelf(L);
+    std::string error = m_sGroup + ": " + m_sName + ": ";
+    LuaHelpers::RunScriptOnStack(L, error, 0, 1, true);
+    if (lua_isnil(L, -1)) {
+      EndRead(L);
+      return nullptr;
+    }
+    return L;
+  }
+  return nullptr;
+}
+
+void IThemeMetric::EndRead(Lua* L) const {
+  lua_pop(L, 1);
+  LUA->Release(L);
+}
+
+void IThemeMetric::PushSelf(Lua* L) {
+  ASSERT(m_Value.IsSet());
+  m_Value.PushSelf(L);
+}
+
+void IThemeMetric::Clear() { m_Value.Unset(); }
+
 // We spend a lot of time doing redundant theme path lookups. Cache results.
 static std::map<std::string, ThemeManager::PathInfo>
     g_ThemePathCache[NUM_ElementCategory];
