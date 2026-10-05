@@ -1,7 +1,6 @@
 #ifndef TIMING_SEGMENTS_H
 #define TIMING_SEGMENTS_H
 
-#include <cmath>
 #include <string>
 #include <vector>
 
@@ -66,7 +65,8 @@ struct TimingSegment {
   // A helper for testing equality of two floats within a level of error
   // epsilon.
   bool AreEqual(float f1, float f2) const {
-    return std::abs(f1 - f2) < EPSILON;
+    float diff = f1 - f2;
+    return (diff < 0 ? -diff : diff) < EPSILON;
   }
 
   virtual ~TimingSegment() {}

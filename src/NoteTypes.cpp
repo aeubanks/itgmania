@@ -1,5 +1,7 @@
 #include "NoteTypes.h"
 
+#include <cmath>
+
 #include "EnumHelper.h"
 #include "GameConstantsAndTypes.h"
 #include "LuaManager.h"
@@ -143,6 +145,10 @@ NoteType GetNoteType(int row) {
     return NOTE_TYPE_192ND;
   }
 };
+
+int BeatToNoteRow(float fBeatNum) {
+  return std::lrint(fBeatNum * ROWS_PER_BEAT);
+}
 
 NoteType BeatToNoteType(float fBeat) {
   return GetNoteType(BeatToNoteRow(fBeat));

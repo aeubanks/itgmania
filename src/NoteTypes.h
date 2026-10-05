@@ -3,7 +3,6 @@
 #ifndef NOTE_TYPES_H
 #define NOTE_TYPES_H
 
-#include <cmath>
 #include <string>
 
 #include "EnumHelper.h"
@@ -331,9 +330,7 @@ inline int   BeatToNoteRow( float fBeatNum )
  * @brief Convert the beat into a note row.
  * @param fBeatNum the beat to convert.
  * @return the note row. */
-inline int BeatToNoteRow(float fBeatNum) {
-  return std::lrint(fBeatNum * ROWS_PER_BEAT);
-}  // round
+int BeatToNoteRow(float fBeatNum);
 /**
  * @brief Convert the beat into a note row without rounding.
  * @param fBeatNum the beat to convert.

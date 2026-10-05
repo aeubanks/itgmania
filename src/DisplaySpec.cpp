@@ -1,10 +1,40 @@
 #include "DisplaySpec.h"
 
 #include <iterator>
+#include <sstream>
 #include <vector>
 
 #include "LuaBinding.h"
 #include "LuaManager.h"
+
+DisplaySpec::DisplaySpec(
+    const std::string& id, const std::string& name,
+    const std::set<DisplayMode>& modes, const DisplayMode& curMode,
+    const RectI& curBounds, const bool isVirtual)
+    : m_sId(id),
+      m_sName(name),
+      m_sModes(modes),
+      m_bCurModeActive(true),
+      m_CurMode(curMode),
+      m_rectBounds(curBounds),
+      m_bIsVirtual(isVirtual) {
+  if (m_sModes.find(curMode) == m_sModes.end()) {
+    // This is an error, make a failing assertion with a descriptive error
+    // message
+    std::stringstream msgStream;
+    msgStream << "DisplaySpec current mode (" << curMode.width << "x"
+              << curMode.height << "@" << curMode.refreshRate
+              << ") not in given list of supported modes: ";
+    for (auto& m : modes) {
+      msgStream << m.width << "x" << m.height << "@" << m.refreshRate << ", ";
+    }
+    auto msg = msgStream.str();
+    // Drop the trailing ", "
+    msg.resize(msg.size() - 2);
+
+    ASSERT_M(false, msg.c_str());
+  }
+}
 
 class LunaDisplayMode : public Luna<DisplayMode> {
  public:
