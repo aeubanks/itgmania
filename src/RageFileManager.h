@@ -2,7 +2,6 @@
 #define RAGE_FILE_MANAGER_H
 
 #include <string>
-#include <unordered_set>
 #include <vector>
 
 /** @brief Constants for working with the RageFileManager. */
@@ -86,7 +85,7 @@ class RageFileManager {
   RageFileBasic* OpenForWriting(
       const std::string& sPath, int iMode, int& iError);
 
-  std::unordered_set<std::string> m_protectedPaths;
+  std::vector<std::string> m_protectedPaths;
 };
 
 extern RageFileManager* FILEMAN;

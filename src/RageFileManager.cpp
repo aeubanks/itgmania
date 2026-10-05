@@ -260,7 +260,7 @@ void RageFileManager::ProtectPath(const std::string& path) {
   NormalizePath(normalizedPath);
   MakeLower(normalizedPath);
 
-  m_protectedPaths.insert(normalizedPath);
+  m_protectedPaths.push_back(normalizedPath);
 }
 
 bool RageFileManager::IsPathProtected(const std::string& path) {
@@ -268,7 +268,9 @@ bool RageFileManager::IsPathProtected(const std::string& path) {
   NormalizePath(normalizedPath);
   MakeLower(normalizedPath);
 
-  return m_protectedPaths.count(normalizedPath) > 0;
+  return std::find(
+             m_protectedPaths.begin(), m_protectedPaths.end(),
+             normalizedPath) != m_protectedPaths.end();
 }
 
 // Mountpoints as directories cause a problem.  If "Themes/default" is a

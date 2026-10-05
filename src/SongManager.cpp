@@ -844,12 +844,10 @@ std::string SongManager::GetSeriesBannerPath(std::string sSeriesName) const {
   // No group in the series defined a SeriesBanner: fall back to the
   // banner of the first group
   Group* firstGroup = nullptr;
-  for (std::unordered_set<Group*>::const_iterator git =
-           it->second.groups.begin();
-       git != it->second.groups.end(); ++git) {
+  for (Group* g : it->second.groups) {
     if (firstGroup == nullptr ||
-        (*git)->GetGroupName() < firstGroup->GetGroupName()) {
-      firstGroup = *git;
+        g->GetGroupName() < firstGroup->GetGroupName()) {
+      firstGroup = g;
     }
   }
   if (firstGroup != nullptr) {
@@ -858,12 +856,13 @@ std::string SongManager::GetSeriesBannerPath(std::string sSeriesName) const {
   return std::string();
 }
 
-std::unordered_set<Group*> SongManager::GetGroupsInSeries(
+const std::set<Group*>& SongManager::GetGroupsInSeries(
     const std::string& sSeriesName) const {
+  static const std::set<Group*> empty;
   std::map<std::string, Series>::const_iterator it =
       m_mapNameToSeries.find(sSeriesName);
   if (it == m_mapNameToSeries.end()) {
-    return std::unordered_set<Group*>();
+    return empty;
   }
   return it->second.groups;
 }

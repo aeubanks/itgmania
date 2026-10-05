@@ -3,7 +3,6 @@
 
 #include <map>
 #include <set>
-#include <unordered_map>
 
 #include "Group.h"
 class LoadingWindow;
@@ -15,7 +14,6 @@ struct lua_State;
 
 #include <cstddef>
 #include <string>
-#include <unordered_set>
 #include <vector>
 
 #include "Course.h"
@@ -139,20 +137,21 @@ class SongManager {
    * @return all of the popular songs. */
   const std::vector<Song*>& GetPopularSongs() const { return m_pPopularSongs; }
 
-  std::map<int, std::vector<Song*>> GetMeterToSongsMap() const {
+  const std::map<int, std::vector<Song*>>& GetMeterToSongsMap() const {
     return m_mapSongsByDifficulty;
   }
   void GetPreferredSortSongs(std::vector<Song*>& AddTo) const;
-  std::map<std::string, std::vector<Song*>> GetPreferredSortSongsMap() const {
+  const std::map<std::string, std::vector<Song*>>& GetPreferredSortSongsMap()
+      const {
     return m_mapPreferredSectionToSongs;
   };
   std::string SongToPreferredSortSectionName(const Song* pSong) const;
   struct Series {
     std::string sName;
-    std::unordered_set<Group*> groups;
+    std::set<Group*> groups;
     std::string sBannerPath;
   };
-  std::unordered_set<Group*> GetGroupsInSeries(
+  const std::set<Group*>& GetGroupsInSeries(
       const std::string& sSeriesName) const;
   Group* GetGroupFromName(const std::string& sGroupName) const;
   Group* GetGroup(const Song* pSong) const;
@@ -273,7 +272,7 @@ class SongManager {
   // vector<std::string>		m_sSongGroupBackgroundPaths; // each
   // song group may have a background associated with it (very rarely)
 
-  std::unordered_map<std::string, Group*>
+  std::map<std::string, Group*>
       m_mapNameToGroup;  // maps a group's name on disk (folder) to a Group
                          // object
   // maps a series name to Series object
