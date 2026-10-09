@@ -183,6 +183,7 @@ list(APPEND SMDATA_ACTOR_GAMEPLAY_MENU_SRC
             "BGAnimationLayer.cpp"
             "DifficultyIcon.cpp"
             "MeterDisplay.cpp"
+            "NPSGraph.cpp"
             "StepsDisplay.cpp"
             "StreamDisplay.cpp"
             "Transition.cpp")
@@ -193,6 +194,7 @@ list(APPEND SMDATA_ACTOR_GAMEPLAY_MENU_HPP
             "BGAnimationLayer.h"
             "DifficultyIcon.h"
             "MeterDisplay.h"
+            "NPSGraph.h"
             "StepsDisplay.h"
             "StreamDisplay.h"
             "Transition.h")
