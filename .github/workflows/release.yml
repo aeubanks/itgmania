@@ -3,6 +3,7 @@ on:
     branches:
       - beta
       - release
+      - x2
 
 name: Release
 
@@ -15,17 +16,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04, ubuntu-24.04-arm, macos-15, macos-15-intel, windows-2022]
-        club_fantastic: [Off, On]
+        os: [windows-2022]
+        club_fantastic: [Off]
         include:
-          - os: ubuntu-24.04
-            name: Ubuntu (x86_64)
-          - os: ubuntu-24.04-arm
-            name: Ubuntu (ARM)
-          - os: macos-15
-            name: macOS (M1)
-          - os: macos-15-intel
-            name: macOS (Intel)
           - os: windows-2022
             name: Windows
 
@@ -43,7 +36,7 @@ jobs:
           ccache: 'false'
 
       - name: Create nightly release
-        if: github.ref_name == 'beta'
+        if: github.ref_name != 'release'
         run: >
           cmake -S . -B build -DCMAKE_BUILD_TYPE=Release 
           -DWITH_FULL_RELEASE=Off -DWITH_NIGHTLY_RELEASE=On 
