@@ -49,4 +49,6 @@ jobs:
       - name: Configure
         run: cmake -B build -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache ${{ env.CMAKE_FLAGS }}
       - name: Build
-        run: cmake --build build ${{ env.CMAKE_BUILD_FLAGS }}
+        run: cmake --build build --config Debug ${{ env.CMAKE_BUILD_FLAGS }}
+      - name: Test
+        run: cmake --build build --config Debug ${{ env.CMAKE_BUILD_FLAGS }} --target run-tests
