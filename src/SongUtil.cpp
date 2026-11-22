@@ -455,7 +455,46 @@ static bool CompareSongPointersByTitle(const Song* song1, const Song* song2) {
 }
 
 void SongUtil::SortSongPointerArrayByTitle(std::vector<Song*>& songs_in_out) {
-  sort(songs_in_out.begin(), songs_in_out.end(), CompareSongPointersByTitle);
+  if (songs_in_out.size() <= 1) {
+    return;
+  }
+  struct TitleSortEntry {
+    Song* song;
+    std::string sort_main;
+  };
+  std::vector<TitleSortEntry> entries;
+  entries.reserve(songs_in_out.size());
+  for (Song* song : songs_in_out) {
+    entries.push_back(
+        {song, SongUtil::MakeSortString(song->GetTranslitMainTitle())});
+  }
+  sort(
+      entries.begin(), entries.end(),
+      [](const TitleSortEntry& a, const TitleSortEntry& b) {
+        const std::string& m1 = a.song->GetTranslitMainTitle();
+        const std::string& m2 = b.song->GetTranslitMainTitle();
+        int ret;
+        if (m1 == m2) {
+          std::string s1 =
+              SongUtil::MakeSortString(a.song->GetTranslitSubTitle());
+          std::string s2 =
+              SongUtil::MakeSortString(b.song->GetTranslitSubTitle());
+          ret = strcmp(s1.c_str(), s2.c_str());
+        } else {
+          ret = strcmp(a.sort_main.c_str(), b.sort_main.c_str());
+        }
+        if (ret < 0) {
+          return true;
+        }
+        if (ret > 0) {
+          return false;
+        }
+        return CompareNoCase(
+                   a.song->GetSongFilePath(), b.song->GetSongFilePath()) < 0;
+      });
+  for (size_t i = 0; i < entries.size(); ++i) {
+    songs_in_out[i] = entries[i].song;
+  }
 }
 
 static bool CompareSongPointersByBPM(const Song* song1, const Song* song2) {
@@ -691,9 +730,77 @@ static int CompareSongPointersByGroupAndTitle(
 
 void SongUtil::SortSongPointerArrayByGroupAndTitle(
     std::vector<Song*>& songs_in_out) {
+  if (songs_in_out.size() <= 1) {
+    return;
+  }
+  struct GroupSortInfo {
+    std::string raw_sort_title;
+    std::string sort_key;
+  };
+  std::unordered_map<std::string, GroupSortInfo> group_cache;
+  struct GroupTitleEntry {
+    Song* song;
+    const GroupSortInfo* group_info;
+    std::string sort_main;
+  };
+  std::vector<GroupTitleEntry> entries;
+  entries.reserve(songs_in_out.size());
+  for (Song* song : songs_in_out) {
+    auto it = group_cache.find(song->group_name_);
+    if (it == group_cache.end()) {
+      std::string raw;
+      Group* group = SONGMAN->GetGroup(song);
+      if (group != nullptr) {
+        raw = group->GetSortTitle();
+      } else {
+        LOG->Warn(
+            "SongUtil::CompareSongPointersByGroup: %s has no group",
+            song->GetSongDir().c_str());
+      }
+      std::string key = SongUtil::MakeSortString(raw);
+      it = group_cache.emplace(
+          song->group_name_, GroupSortInfo{std::move(raw), std::move(key)}).first;
+    }
+    entries.push_back(
+        {song, &it->second,
+         SongUtil::MakeSortString(song->GetTranslitMainTitle())});
+  }
   sort(
-      songs_in_out.begin(), songs_in_out.end(),
-      CompareSongPointersByGroupAndTitle);
+      entries.begin(), entries.end(),
+      [](const GroupTitleEntry& a, const GroupTitleEntry& b) {
+        if (a.group_info->raw_sort_title == b.group_info->raw_sort_title) {
+          if (a.song->group_name_ == b.song->group_name_) {
+            const std::string& m1 = a.song->GetTranslitMainTitle();
+            const std::string& m2 = b.song->GetTranslitMainTitle();
+            int ret;
+            if (m1 == m2) {
+              std::string s1 =
+                  SongUtil::MakeSortString(a.song->GetTranslitSubTitle());
+              std::string s2 =
+                  SongUtil::MakeSortString(b.song->GetTranslitSubTitle());
+              ret = strcmp(s1.c_str(), s2.c_str());
+            } else {
+              ret = strcmp(a.sort_main.c_str(), b.sort_main.c_str());
+            }
+            if (ret < 0) {
+              return true;
+            }
+            if (ret > 0) {
+              return false;
+            }
+            return CompareNoCase(
+                       a.song->GetSongFilePath(), b.song->GetSongFilePath()) <
+                   0;
+          }
+          return a.song->group_name_ < b.song->group_name_;
+        }
+        return strcmp(
+                   a.group_info->sort_key.c_str(),
+                   b.group_info->sort_key.c_str()) < 0;
+      });
+  for (size_t i = 0; i < entries.size(); ++i) {
+    songs_in_out[i] = entries[i].song;
+  }
 }
 
 void SongUtil::SortSongPointerArrayByNumPlays(
@@ -708,15 +815,23 @@ void SongUtil::SortSongPointerArrayByNumPlays(
 void SongUtil::SortSongPointerArrayByNumPlays(
     std::vector<Song*>& songs_in_out, const Profile* profile, bool descending) {
   ASSERT(profile != nullptr);
-  for (unsigned i = 0; i < songs_in_out.size(); ++i) {
-    g_mapSongSortVal[songs_in_out[i]] =
-        ssprintf("%9i", profile->GetSongNumTimesPlayed(songs_in_out[i]));
+  if (songs_in_out.size() <= 1) {
+    return;
+  }
+  std::vector<std::pair<int, Song*>> entries;
+  entries.reserve(songs_in_out.size());
+  for (Song* song : songs_in_out) {
+    entries.emplace_back(profile->GetSongNumTimesPlayed(song), song);
   }
   stable_sort(
-      songs_in_out.begin(), songs_in_out.end(),
-      descending ? CompareSongPointersBySortValueDescending
-                 : CompareSongPointersBySortValueAscending);
-  g_mapSongSortVal.clear();
+      entries.begin(), entries.end(),
+      [descending](
+          const std::pair<int, Song*>& a, const std::pair<int, Song*>& b) {
+        return descending ? (a.first > b.first) : (a.first < b.first);
+      });
+  for (size_t i = 0; i < entries.size(); ++i) {
+    songs_in_out[i] = entries[i].second;
+  }
 }
 
 std::string SongUtil::GetSectionNameFromSongAndSort(
