@@ -921,34 +921,49 @@ void MusicWheel::BuildWheelItemDatas(
         case SORT_SERIES:
           // this is currently the only sort that creates
           // WheelItemDataType_ParentSection items.
+          array_wheel_item_datas.reserve(
+              array_wheel_item_datas.size() + array_songs.size() + 512);
           if (use_sections) {
             std::string last_series;
             std::string last_group;
+            Group* last_group_ptr = nullptr;
             bool have_last = false;
             for (unsigned i = 0; i < array_songs.size(); ++i) {
               Song* p_song = array_songs[i];
-              Group* group = SONGMAN->GetGroup(p_song);
-              if (group == nullptr) {
-                LOG->Warn(
-                    "Song %s has no group!", p_song->GetSongDir().c_str());
-                continue;
-              }
-              const std::string group_name = group->GetGroupName();
-              int num_groups_in_series =
-                  SONGMAN->GetGroupsInSeries(group->GetSeries()).size();
+              Group* group = nullptr;
               std::string series_name;
-              if (num_groups_in_series > 1) {
-                series_name = group->GetSeries();
+              if (have_last && p_song->group_name_ == last_group) {
+                group = last_group_ptr;
+                series_name = last_series;
               } else {
-                series_name = "";
+                group = SONGMAN->GetGroup(p_song);
+                if (group == nullptr) {
+                  LOG->Warn(
+                      "Song %s has no group!", p_song->GetSongDir().c_str());
+                  continue;
+                }
+                int num_groups_in_series =
+                    SONGMAN->GetGroupsInSeries(group->GetSeries()).size();
+                if (num_groups_in_series > 1) {
+                  series_name = group->GetSeries();
+                }
               }
+              const std::string& group_name = group->GetGroupName();
+
               // New ParentSection for each new series.
               if (!series_name.empty() &&
                   (!have_last || series_name != last_series)) {
                 int series_song_count = 0;
+                const std::string* prev_gname = nullptr;
+                Group* cached_g = nullptr;
                 for (unsigned j = i; j < array_songs.size(); ++j) {
-                  Group* g = SONGMAN->GetGroup(array_songs[j]);
-                  if (g != nullptr && g->GetSeries() == series_name) {
+                  const std::string& gname = array_songs[j]->group_name_;
+                  if (prev_gname == nullptr || gname != *prev_gname) {
+                    cached_g = SONGMAN->GetGroup(array_songs[j]);
+                    prev_gname = &gname;
+                  }
+                  if (cached_g != nullptr &&
+                      cached_g->GetSeries() == series_name) {
                     ++series_song_count;
                   } else {
                     break;
@@ -968,8 +983,7 @@ void MusicWheel::BuildWheelItemDatas(
               if (!have_last || group_name != last_group) {
                 int group_song_count = 0;
                 for (unsigned j = i; j < array_songs.size(); ++j) {
-                  Group* g = SONGMAN->GetGroup(array_songs[j]);
-                  if (g == group) {
+                  if (array_songs[j]->group_name_ == p_song->group_name_) {
                     ++group_song_count;
                   } else {
                     break;
@@ -985,9 +999,12 @@ void MusicWheel::BuildWheelItemDatas(
                   WheelItemDataType_Song, p_song, group_name, nullptr, group,
                   SONGMAN->GetSongColor(p_song), 0, series_name));
 
-              last_series = series_name;
-              last_group = group_name;
-              have_last = true;
+              if (!have_last || group != last_group_ptr) {
+                last_series = series_name;
+                last_group = group_name;
+                last_group_ptr = group;
+                have_last = true;
+              }
             }
           } else {
             for (unsigned i = 0; i < array_songs.size(); i++) {
