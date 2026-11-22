@@ -1451,16 +1451,7 @@ void SongManager::InvalidateCachedTrails() {
 
 /* Called periodically to wipe out cached NoteData. This is called when we
  * change screens. */
-void SongManager::Cleanup() {
-  for (Song* song : shuffled_songs_) {
-    if (song) {
-      const std::vector<Steps*>& vp_steps = song->GetAllSteps();
-      for (Steps* p_steps : vp_steps) {
-        p_steps->Compress();
-      }
-    }
-  }
-}
+void SongManager::Cleanup() { Steps::CompressAll(); }
 
 /* Flush all Song*, Steps* and Course* caches. This is when a Song or its Steps
  * are removed or changed. This doesn't touch GAMESTATE and StageStats

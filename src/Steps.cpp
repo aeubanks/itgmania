@@ -15,8 +15,10 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <mutex>
 #include <sstream>
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 #include "ColumnCues.h"
@@ -140,6 +142,7 @@ Steps::Steps(Song* song)
       note_data_(new NoteData),
       note_data_is_filled_(false),
       note_data_compressed_(""),
+      registered_for_cleanup_(false),
       filename_(""),
       saved_to_disk_(false),
       loaded_from_profile_(ProfileSlot_Invalid),
@@ -155,7 +158,49 @@ Steps::Steps(Song* song)
       specified_bpm_min_(0),
       specified_bpm_max_(0) {}
 
-Steps::~Steps() {}
+namespace {
+std::mutex g_uncompressed_steps_mutex;
+std::unordered_set<const Steps*> g_uncompressed_steps;
+}  // namespace
+
+void Steps::RegisterForCleanup() const {
+  if (registered_for_cleanup_) {
+    return;
+  }
+  std::lock_guard<std::mutex> lock(g_uncompressed_steps_mutex);
+  if (!registered_for_cleanup_) {
+    g_uncompressed_steps.insert(this);
+    registered_for_cleanup_ = true;
+  }
+}
+
+void Steps::CompressAll() {
+  if (GAMESTATE != nullptr && GAMESTATE->in_step_editor_) {
+    return;
+  }
+  std::unordered_set<const Steps*> to_compress;
+  {
+    std::lock_guard<std::mutex> lock(g_uncompressed_steps_mutex);
+    if (g_uncompressed_steps.empty()) {
+      return;
+    }
+    to_compress.swap(g_uncompressed_steps);
+    for (const Steps* s : to_compress) {
+      s->registered_for_cleanup_ = false;
+    }
+  }
+  for (const Steps* s : to_compress) {
+    s->Compress();
+  }
+}
+
+Steps::~Steps() {
+  if (registered_for_cleanup_) {
+    std::lock_guard<std::mutex> lock(g_uncompressed_steps_mutex);
+    g_uncompressed_steps.erase(this);
+    registered_for_cleanup_ = false;
+  }
+}
 
 void Steps::GetDisplayBpms(DisplayBpms& add_to) const {
   if (this->GetDisplayBPM() == DISPLAY_BPM_SPECIFIED) {
@@ -267,6 +312,7 @@ void Steps::SetNoteData(const NoteData& note_data_new) {
 
   note_data_compressed_ = std::string();
   hash_ = 0;
+  RegisterForCleanup();
 }
 
 void Steps::GetNoteData(NoteData& note_data_out) const {
@@ -293,6 +339,9 @@ void Steps::SetSMNoteData(const std::string& notes_comp) {
 
   note_data_compressed_ = notes_comp;
   hash_ = 0;
+  if (!note_data_compressed_.empty()) {
+    RegisterForCleanup();
+  }
 }
 
 /* XXX: this function should pull data from m_sFilename, like Decompress() */
@@ -516,6 +565,7 @@ void Steps::Decompress() {
     parent_->GetNoteData(notedata);
 
     note_data_is_filled_ = true;
+    RegisterForCleanup();
 
     int new_tracks = GAMEMAN->GetStepsTypeInfo(steps_type_).num_tracks_;
 
@@ -546,6 +596,7 @@ void Steps::Decompress() {
         GAMEMAN->GetStepsTypeInfo(steps_type_).steps_type_category_ ==
         StepsTypeCategory_Routine;
     note_data_is_filled_ = true;
+    RegisterForCleanup();
     note_data_->SetNumTracks(
         GAMEMAN->GetStepsTypeInfo(steps_type_).num_tracks_);
 
@@ -566,7 +617,7 @@ void Steps::Compress() const {
     return;
   }
 
-  for (NoteAnnotationCache annotation_cache : note_annotations_) {
+  for (NoteAnnotationCache& annotation_cache : note_annotations_) {
     annotation_cache.Compress();
   }
 
@@ -576,13 +627,17 @@ void Steps::Compress() const {
      * the device), and when we start a game and load edits, we want to be
      * sure that it'll be available if the user picks it and pulls the device.
      * Also, Decompress() doesn't know how to load .edits. */
-    note_data_->Init();
-    note_data_is_filled_ = false;
+    if (note_data_is_filled_) {
+      note_data_->Init();
+      note_data_is_filled_ = false;
+    }
 
     /* Be careful; 'x = ""', m_sNoteDataCompressed.clear() and
      * m_sNoteDataCompressed.reserve(0) don't always free the allocated memory.
      */
-    note_data_compressed_ = std::string();
+    if (!note_data_compressed_.empty()) {
+      note_data_compressed_ = std::string();
+    }
     return;
   }
 
@@ -955,7 +1010,9 @@ const std::vector<NoteAnnotation>& Steps::GetNoteAnnotations(
   static const std::vector<NoteAnnotation> kEmptyVector;
   if (Real()->note_annotations_.size() == 0) {
     return kEmptyVector;
-  } else if (Real()->note_annotations_.size() <= pn) {
+  }
+  Real()->RegisterForCleanup();
+  if (Real()->note_annotations_.size() <= pn) {
     return Real()->note_annotations_[PLAYER_1].GetNoteAnnotations();
   } else {
     return Real()->note_annotations_[pn].GetNoteAnnotations();

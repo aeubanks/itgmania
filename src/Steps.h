@@ -65,6 +65,7 @@ class Steps {
   void CreateBlank(StepsType to);
 
   void Compress() const;
+  static void CompressAll();
   void Decompress() const;
   void Decompress();
   /**
@@ -316,6 +317,8 @@ class Steps {
   mutable HiddenPtr<NoteData> note_data_;
   mutable bool note_data_is_filled_;
   mutable std::string note_data_compressed_;
+  mutable bool registered_for_cleanup_;
+  void RegisterForCleanup() const;
 
   /** @brief The name of the file where these steps are stored. */
   std::string filename_;
@@ -350,7 +353,7 @@ class Steps {
   std::vector<std::vector<int>> notes_per_measure_;
   std::vector<StreamBreakdown> stream_breakdown_;
 
-  std::vector<NoteAnnotationCache> note_annotations_;
+  mutable std::vector<NoteAnnotationCache> note_annotations_;
   std::vector<float> peak_nps_;
 
   std::string groove_stats_hash_;
